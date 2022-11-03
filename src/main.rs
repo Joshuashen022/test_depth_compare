@@ -26,7 +26,7 @@ async fn main(){
 
         println!("now {}", instance.elapsed().as_millis());
         while let Ok(msg) = stream.next().await.unwrap(){ //
-            println!("now1 {}", instance.elapsed().as_millis());
+            
             if !msg.is_text() {
                 continue
             }
@@ -37,7 +37,11 @@ async fn main(){
                 Ok(e) => e,
                 Err(_) => continue,
             };
-            println!("now2 {}", instance.elapsed().as_millis());
+            println!("now2 {} event{}-{} ", 
+                instance.elapsed().as_millis(),
+                event.first_update_id,
+                event.last_update_id,
+            );
         };
     }
     
