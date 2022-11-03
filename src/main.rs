@@ -1,29 +1,32 @@
 mod deep;
 
 
-use deep::{Event, BinanceSpotOrderBookSnapshot, get_infustructure};
+// use deep::{Event, BinanceSpotOrderBookSnapshot, get_infustructure};
 use tokio_tungstenite::connect_async;
 use url::Url;
 // use tokio::net::TcpStream;
 // use tokio::time::{sleep, Duration};
 use futures_util::StreamExt;
-use anyhow::Result;
-use anyhow::anyhow;
+use std::time::Instant;
+// use anyhow::Result;
+// use anyhow::anyhow;
 const DEPTH_URL: &str = "wss://stream.binance.com:9443/ws/bnbbtc@depth@100ms";
-const MAX_BUFFER: usize = 30;
+// const MAX_BUFFER: usize = 30;
 #[tokio::main]
 async fn main(){
 
     loop{
         let url = Url::parse(DEPTH_URL).expect("Bad URL");
-
+        let instance = Instant::now();
         let res = connect_async(url).await;
         let mut stream = match res{
             Ok((stream, _)) => stream,
             Err(e) => return ,
         };
 
+        println!("now {}", instance.elapsed().as_millis());
         while let Ok(msg) = stream.next().await.unwrap(){ //
+            println!("now1 {}", instance.elapsed().as_millis());
             if !msg.is_text() {
                 continue
             }
@@ -34,6 +37,7 @@ async fn main(){
                 Ok(e) => e,
                 Err(_) => continue,
             };
+            println!("now2 {}", instance.elapsed().as_millis());
         };
     }
     
