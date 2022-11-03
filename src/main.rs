@@ -1,30 +1,42 @@
 mod deep;
 
 
-use deep::{Event, BinanceSpotOrderBookSnapshot};
-// use tokio_tungstenite::connect_async;
-// use url::Url;
+use deep::{Event, BinanceSpotOrderBookSnapshot, get_infustructure};
+use tokio_tungstenite::connect_async;
+use url::Url;
 // use tokio::net::TcpStream;
 // use tokio::time::{sleep, Duration};
-// use futures_util::StreamExt;
+use futures_util::StreamExt;
 use anyhow::Result;
-
+use anyhow::anyhow;
+const DEPTH_URL: &str = "wss://stream.binance.com:9443/ws/bnbbtc@depth@100ms";
+const MAX_BUFFER: usize = 30;
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main(){
 
+    loop{
+        let url = Url::parse(DEPTH_URL).expect("Bad URL");
 
-    println!("prepare for snap shot");
-    let snapshot: BinanceSpotOrderBookSnapshot = reqwest::get("https://api.binance.com/api/v3/depth?symbol=BNBBTC&limit=1000")
-    .await?
-    .json()
-    .await?;
+        let res = connect_async(url).await;
+        let mut stream = match res{
+            Ok((stream, _)) => stream,
+            Err(e) => return ,
+        };
 
+        while let Ok(msg) = stream.next().await.unwrap(){ //
+            if !msg.is_text() {
+                continue
+            }
 
-    // abc
-    // println!("{}", text);
+            let text = msg.into_text().unwrap();
 
-    println!("{:#?}", snapshot);
-    Ok(())
+            let event: Event = match serde_json::from_str(&text){
+                Ok(e) => e,
+                Err(_) => continue,
+            };
+        };
+    }
+    
 }
 
 #[test]
@@ -42,5 +54,14 @@ fn event_test(){
 
 #[test]
 fn http_snapshot(){
+    use std::collections::VecDeque;
+    let mut buffer = VecDeque::new();
+    
+    for i in 0..10{
+        buffer.push_back(i);
+    }
 
+    while let Some(i) = buffer.pop_front() {
+        println!("{}", i);
+    }
 }

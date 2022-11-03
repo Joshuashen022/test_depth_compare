@@ -1,5 +1,6 @@
 use std::fmt;
 use serde::{de::Visitor, Deserialize, Deserializer, de::SeqAccess};
+use anyhow::{Result, Error};
 
 #[derive(Deserialize, Debug)]
 pub struct Event {
@@ -81,4 +82,20 @@ pub struct BinanceSpotOrderBookSnapshot {
     pub last_update_id: i64,
     pub bids: Vec<DepthRow>,
     pub asks: Vec<DepthRow>,
+}
+
+pub fn get_infustructure(){
+    tokio::spawn(async move {
+        
+        loop {
+            let res: Result<()> = {
+                let snapshot: BinanceSpotOrderBookSnapshot = reqwest::get("https://api.binance.com/api/v3/depth?symbol=BNBBTC&limit=1000")
+                                .await?
+                                .json()
+                                .await?;
+                Ok(())
+            };
+        }
+        Ok::<(), Error>(())
+    });
 }
