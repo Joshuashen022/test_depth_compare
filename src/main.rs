@@ -40,7 +40,7 @@ async fn main(){
             };
             println!("now2 {} {:?} ", 
                 instance.elapsed().as_millis(),
-                level_event,
+                level_event.last_update_id,
             );
         };
     }
