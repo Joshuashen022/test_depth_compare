@@ -20,6 +20,17 @@ pub struct Event {
     pub asks: Vec<DepthRow>,
 }
 
+#[derive(Deserialize, Debug)]
+pub struct LevelEvent {
+    #[serde(rename = "lastUpdateId")]
+    pub last_update_id: i64,
+    
+    pub bids: Vec<DepthRow>,
+    
+    pub asks: Vec<DepthRow>,
+}
+
+
 #[derive(Debug)]
 pub struct DepthRow {
     pub price: f64,
