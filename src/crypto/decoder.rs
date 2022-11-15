@@ -31,7 +31,7 @@ pub fn subscribe_message(channel: String) -> String{
     let _time = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
     let inner = OrderRequest{
         id: 1, 
-        method: String::from("SUBSCRIBE"),
+        method: String::from("subscribe"),
         params: Params { 
             channels: vec![channel],
         },
