@@ -15,16 +15,17 @@ pub struct OrderRequest{
     pub params:Params,
 }
 #[derive(Deserialize, Serialize)]
-
 pub struct Params{
     pub channels:Vec<String>
 }
 
+//Text("{\"id\":1,\"code\":0,\"method\":\"subscribe\",\"channel\":\"book.BTCUSD-PERP\"}")
 #[derive(Deserialize, Serialize, PartialEq, Eq, Debug)]
 pub struct OrderResponse{
     pub id: i64,
     pub code: i64,
     pub method: String,
+    pub channel: String,
 }
 
 pub fn subscribe_message(channel: String) -> String{
@@ -37,6 +38,11 @@ pub fn subscribe_message(channel: String) -> String{
         },
     };
     serde_json::to_string(&inner).unwrap()
+}
+
+pub fn subscribe_success() -> bool{
+    
+    false
 }
 
 
@@ -109,7 +115,7 @@ pub struct Data {
     #[serde(rename = "tt")]
     pub last_update_time: i64,
 
-    #[serde(rename = "t")]
+    #[serde(rename = "u")]
     pub update_sequence: i64,
     
     #[serde(rename = "cs")]

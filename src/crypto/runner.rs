@@ -62,40 +62,6 @@ pub async fn send_request(){
 
     
     };
-
-    while let Ok(msg) = stream.next().await.unwrap() {
-        if !msg.is_text() {
-            println!("msg is empty");
-            continue;
-        }
-
-        let text = match msg.clone().into_text() {
-            Ok(e) => e,
-            Err(e) => {
-                println!("msg.into_text {:?}", e);
-                continue;
-            }
-        };
-
-        let level_event: OrderResponse = match serde_json::from_str(&text) {
-            Ok(event) => event,
-            Err(e) => {
-                println!("Error {}, {:?}", e, msg);
-                continue;
-            }
-        };
-
-        let response = OrderResponse{id:0,code:0,method:String::from("subscribe")};
-        
-        println!("{:?}", level_event);
-        
-        if level_event.method == response.method {
-            println!("yes!");
-            break
-        }
-
-    
-    };
     
 }
 
