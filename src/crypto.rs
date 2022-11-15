@@ -46,7 +46,7 @@ pub async fn send_request(){
     let time = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
     let inner = OrderRequest{
         id: 11, 
-        method: String::from("subscribe"),
+        method: String::from("SUBSCRIBE"),
         params: Params { 
             channels: vec![String::from("user.order.ETH_CRO")],
         },
@@ -81,7 +81,7 @@ pub async fn send_request(){
                 continue;
             }
         };
-        
+
         let response = OrderResponse{id:0,code:0,method:String::from("subscribe")};
         
         println!("{:?}", level_event);
