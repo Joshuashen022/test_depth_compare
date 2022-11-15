@@ -6,11 +6,14 @@ use deep::{LevelEvent, Event, BinanceSpotOrderBookSnapshot, get_infustructure, D
 use tokio_tungstenite::connect_async;
 use url::Url;
 use futures_util::StreamExt;
-use std::{time::Instant, io::Read};
+use std::{time::Instant};
+use crypto::send_request;
 const LEVEL_DEPTH_URL: &str = "wss://stream.binance.com:9443/ws/bnbbtc@depth20@100ms";
 // const MAX_BUFFER: usize = 30;
 #[tokio::main]
 async fn main(){
+    
+    send_request().await;
 
     loop{
         let url = Url::parse(LEVEL_DEPTH_URL).expect("Bad URL");
