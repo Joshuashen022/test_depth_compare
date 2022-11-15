@@ -203,6 +203,7 @@ fn none_or_error_question_mark(){
 #[test]
 fn decode(){
     use std::fs::OpenOptions;
+    use std::io::Read;
     {
         let mut reader = OpenOptions::new().read(true).open("crypto").unwrap();
         let mut buffer = String::new();

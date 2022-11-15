@@ -7,6 +7,7 @@ use futures_util::{Sink, SinkExt, StreamExt};
 use url::Url;
 use serde::{Deserialize, Serialize};
 use std::pin::Pin;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 #[derive(Deserialize, Serialize)]
 pub struct OrderRequest{
@@ -29,9 +30,22 @@ struct Params{
     channels:Vec<String>
 }
 
+fn subscribe_message() -> String{
+    let time = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
+    let inner = OrderRequest{
+        id: 11, 
+        method: String::from("SUBSCRIBE"),
+        params: Params { 
+            channels: vec![String::from("user.order.ETH_CRO")],
+        },
+        nonce: time.as_millis() as i64,
+    };
+    serde_json::to_string(&inner).unwrap()
+}
+
 pub async fn send_request(){
-    use std::time::{SystemTime, UNIX_EPOCH};
-    const LEVEL_DEPTH_URL: &str = "wss://stream.binance.com:9443/ws/bnbbtc@depth20@100ms";
+    
+    const LEVEL_DEPTH_URL: &str = "wss://stream.crypto.com/v2/market";
     let url = Url::parse(LEVEL_DEPTH_URL).expect("Bad URL");
     let mut stream = match connect_async(url).await {
         Ok((connection, responce)) => connection,
@@ -43,17 +57,7 @@ pub async fn send_request(){
 
     println!("connection SUCCESS");
 
-    let time = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
-    let inner = OrderRequest{
-        id: 11, 
-        method: String::from("SUBSCRIBE"),
-        params: Params { 
-            channels: vec![String::from("user.order.ETH_CRO")],
-        },
-        nonce: time.as_millis() as i64,
-    };
-    let text = serde_json::to_string(&inner).unwrap();
-    let message = Message::from(text);
+    let message = Message::from(subscribe_message());
     // let _ = Pin::new(&mut stream).start_send(message);
     
     stream.send(message).await.unwrap();
@@ -93,4 +97,10 @@ pub async fn send_request(){
     
     };
     
+}
+
+
+#[test]
+fn subscribe_message_out(){
+    println!("{}", subscribe_message());
 }
