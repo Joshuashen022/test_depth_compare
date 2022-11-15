@@ -1,17 +1,12 @@
 mod deep;
 mod crypto_decode;
-use serde::{de::Visitor, Deserialize, Serialize, Deserializer, de::SeqAccess};
+mod crypto;
 
 use deep::{LevelEvent, Event, BinanceSpotOrderBookSnapshot, get_infustructure, DepthRow};
 use tokio_tungstenite::connect_async;
 use url::Url;
-// use tokio::net::TcpStream;
-// use tokio::time::{sleep, Duration};
 use futures_util::StreamExt;
-use std::{time::Instant, fmt::format, io::Read};
-// use anyhow::Result;
-// use anyhow::anyhow;
-// const DEPTH_URL: &str = "wss://stream.binance.com:9443/ws/bnbbtc@depth@100ms";
+use std::{time::Instant, io::Read};
 const LEVEL_DEPTH_URL: &str = "wss://stream.binance.com:9443/ws/bnbbtc@depth20@100ms";
 // const MAX_BUFFER: usize = 30;
 #[tokio::main]
