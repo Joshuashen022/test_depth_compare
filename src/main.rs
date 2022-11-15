@@ -1,13 +1,14 @@
 mod deep;
+mod crypto_decode;
+use serde::{de::Visitor, Deserialize, Serialize, Deserializer, de::SeqAccess};
 
-
-use deep::{LevelEvent, Event, BinanceSpotOrderBookSnapshot, get_infustructure};
+use deep::{LevelEvent, Event, BinanceSpotOrderBookSnapshot, get_infustructure, DepthRow};
 use tokio_tungstenite::connect_async;
 use url::Url;
 // use tokio::net::TcpStream;
 // use tokio::time::{sleep, Duration};
 use futures_util::StreamExt;
-use std::time::Instant;
+use std::{time::Instant, fmt::format, io::Read};
 // use anyhow::Result;
 // use anyhow::anyhow;
 // const DEPTH_URL: &str = "wss://stream.binance.com:9443/ws/bnbbtc@depth@100ms";
@@ -79,4 +80,199 @@ fn http_snapshot(){
         println!("{}", i);
     }
     println!("b.len {}", b.len());
+}
+
+#[test]
+fn time_stamp(){
+    use std::time::{UNIX_EPOCH, SystemTime};
+    let time = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
+                                                                                                                                                                                                                                                                         
+    println!("{}", time.as_millis());
+
+}
+
+#[test]
+fn while_let(){
+    let mut v = vec![0,1,2,3];
+
+
+    while let Some(s) = v.pop(){
+        if s == 2 {
+            break;
+        }
+    }
+    println!("{:?}", v);
+
+}
+
+
+#[test]
+fn sender_receiver(){
+    use tokio::{
+        time::{sleep, Duration},
+        sync::mpsc::{self, Receiver},
+    };
+
+    use tokio::runtime::Runtime;
+    
+    let rt = Runtime::new().unwrap();
+
+    rt.block_on(async {
+        let (tx, mut rx) = mpsc::channel(3);
+
+        tokio::spawn(async move {
+            for i in 0..5{
+                tx.send(i).await.unwrap();
+                println!("send {}", i);
+            }
+        });
+        
+    
+        tokio::spawn(async move {
+            while let Some(i) = rx.recv().await {
+                println!("rec {}", i);
+                sleep(Duration::from_millis(1000)).await;
+            }
+        });
+    });
+
+}
+
+
+#[test]
+fn join_handle_useage(){
+    // use tokio::{
+    //     time::{sleep, Duration},
+    //     sync::mpsc::{self, Receiver},
+    // };
+
+    use tokio::task::spawn_blocking;
+    use tokio::runtime::Runtime;
+    
+    async fn number() -> i32{
+        6
+    }
+
+
+    let rt = Runtime::new().unwrap();
+
+    let _ = rt.block_on(async {
+        let res = tokio::spawn(async {
+            number().await
+        });
+        
+        res.await
+    });
+
+
+
+}
+
+#[test]
+fn split_contract(){
+    let s1 = String::from("btcusdt_swap");
+    let s2 = String::from("btcusd_221230_swap");
+    let s3 = String::from("bnbbtc");
+    fn valid_symbol(symbol: &str) -> bool{
+        symbol.split("_").collect::<Vec<_>>().len() <= 3
+    }
+    let v1 = s1.split("_swap").collect::<Vec<_>>();
+
+    let v2 = s2.split("_swap").collect::<Vec<_>>();
+    let v3 = s3.split("_swap").collect::<Vec<_>>();
+
+    println!("{:?}", v1);
+    println!("{:?}", v2);
+    println!("{:?}", v3);
+
+    println!("{:?}", valid_symbol(&s1));
+    println!("{:?}", valid_symbol(&s2));
+    println!("{:?}", valid_symbol(&s3));
+}
+
+
+#[test]
+fn none_or_error_question_mark(){
+
+    // fn question_mark_function() -> Result<String, String>{
+    //     let a = Some(1);
+    //     let b: Result<String, String> = Ok("2".to_string());
+    //     let res1 = a.or();
+    //     b
+    // }
+}
+
+#[test]
+fn decode(){
+    use std::fs::OpenOptions;
+    {
+        let mut reader = OpenOptions::new().read(true).open("crypto").unwrap();
+        let mut buffer = String::new();
+        assert!(reader.read_to_string(&mut buffer).is_ok());
+        let res:crypto_decode::LevelEventStream = serde_json::from_str(&buffer).unwrap();
+    }
+
+    {
+        let mut reader = OpenOptions::new().read(true).open("depth").unwrap();
+        let mut buffer = String::new();
+        assert!(reader.read_to_string(&mut buffer).is_ok());
+        let res:deep::DepthRow = serde_json::from_str(&buffer).unwrap();
+        println!("{:?}", res);
+    }
+
+    {
+        let mut reader = OpenOptions::new().read(true).open("abc").unwrap();
+        let mut buffer = String::new();
+        assert!(reader.read_to_string(&mut buffer).is_ok());
+        let res:crypto_decode::Quotes = serde_json::from_str(&buffer).unwrap();
+        println!("{:?}", res);
+    }
+    
+    
+
+}
+
+#[test]
+fn dynamic_box(){
+
+    // use tokio::sync::mpsc::UnboundedReceiver;
+    // use tokio::sync::mpsc;
+    // use tokio::runtime::Runtime;
+
+
+    // trait Moew{
+    //     fn moew(&self) -> String{
+    //         String::from("noew")
+    //     }
+    // }
+    // struct AmeShort;
+
+    // struct Orange;
+
+    // impl Moew for AmeShort{}
+
+    // impl Moew for Orange{}
+
+    // fn be_cat() -> Box<dyn Moew>{
+    //     let a = AmeShort;
+    //     Box::new(a)
+    // }
+
+    // async fn cat_in_a_box() -> Option<UnboundedReceiver<Box<dyn Moew>>>{
+    //     let (mut sender, receiver) = mpsc::unbounded_channel();
+    //     let a_cat = AmeShort;
+    //     sender.send(Box::new(a_cat));
+
+    //     Some(receiver)
+    // }
+
+    // let rt = Runtime::new().unwrap();
+    // rt.block_on(async{
+        
+        
+        
+        
+    //     let _ = be_cat().moew();
+    // });
+    
 }
