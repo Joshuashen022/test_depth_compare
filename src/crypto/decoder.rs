@@ -41,7 +41,6 @@ pub struct OrderRequest{
 #[derive(Deserialize, Serialize)]
 pub struct Params{
     pub channels:Vec<String>,
-    pub depth:i64,
 }
 
 #[derive(Deserialize, Serialize, PartialEq, Eq, Debug)]
@@ -67,7 +66,7 @@ pub fn subscribe_message(channel: String) -> String{
         method: String::from("subscribe"),
         params: Params { 
             channels: vec![channel],
-            depth: 20,
+        
         },
     };
     serde_json::to_string(&inner).unwrap()
