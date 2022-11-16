@@ -33,14 +33,9 @@ pub async fn send_request(){
     };
 
     println!("send SUCCESS");
-    let mut confirmed = false;
-    let mut default_exit = 0;
+
     while let Some(Ok(msg))= stream.next().await{
-        if default_exit == 5{
-            println!("using default exit");
-            break;
-        }
-        default_exit += 1;
+        
         
         if !msg.is_text() {
             println!("msg is empty");
@@ -57,7 +52,7 @@ pub async fn send_request(){
 
         let response: GeneralResponse = match serde_json::from_str(&text) {
             Ok(response) => {
-                println!("Receive confirm message {:?}", response);
+                // println!("Receive confirm message {:?}", response);
                 response
             },
             Err(e) => {
