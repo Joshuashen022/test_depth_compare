@@ -89,7 +89,7 @@ pub struct Shared {
 
 
 #[derive(Deserialize, Debug)]
-pub struct LevelEventStream<Event> {
+pub struct LevelEventStream<Event:EventT> {
     /// Usually constant value `-1`
     pub id: i64,
 
@@ -100,6 +100,16 @@ pub struct LevelEventStream<Event> {
     pub code: i64,
 
     pub result: Event,
+}
+
+impl<Event:EventT> LevelEventStream<Event>{
+    pub fn event(&self) -> &Event{
+        &self.result
+    }
+    
+    pub fn data(&self) -> &Vec<<Event as EventT>::Data>{
+        &self.result.data()
+    }
 }
 
 
@@ -113,6 +123,18 @@ pub struct TradeEvent{
     pub instrument_name: String,
 
     pub data: Vec<TradeData>,
+}
+
+impl EventT for TradeEvent{
+    type Data = TradeData;
+    fn data(&self) -> &Vec<Self::Data> {
+        &self.data
+    }
+}
+
+pub trait EventT{
+    type Data;
+    fn data(&self) -> &Vec<Self::Data>;
 }
 
 #[derive(Deserialize, Debug, Clone)]
@@ -153,7 +175,12 @@ pub struct BookEvent {
     pub depth: i64,
 
 }
-
+impl EventT for BookEvent{
+    type Data = Data;
+    fn data(&self) -> &Vec<Self::Data> {
+        &self.data
+    }
+}
 #[derive(Deserialize, Clone)]
 pub struct Data {
     /// Some timestamp server tells us

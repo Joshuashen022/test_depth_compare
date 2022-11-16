@@ -114,7 +114,7 @@ pub async fn send_request(){
             }
         };
 
-        println!("receive BookEvent {:?}", event);
+        println!("receive BookEvent {:?}", event.data());
 
     }
     
