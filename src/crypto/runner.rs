@@ -24,7 +24,7 @@ pub async fn send_request(){
     };
 
     println!("connection SUCCESS");
-    let channel = String::from("book.BTCUSD-PERP.50");
+    let channel = String::from("book.BTCUSD-PERP.10");
     let message = Message::from(subscribe_message(channel));
     
     match stream.send(message).await{
