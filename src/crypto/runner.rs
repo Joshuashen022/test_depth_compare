@@ -97,6 +97,7 @@ pub async fn send_request(){
                     }
                 };
                 println!("Receive {:?}, initialize success", order_response);
+                continue;
             }, // initialize
             ("subscribe", -1)=> (),// snapshot
             _ => {
@@ -113,7 +114,7 @@ pub async fn send_request(){
             }
         };
 
-        println!("receive BookEvent {}", event.method);
+        println!("receive BookEvent {:?}", event);
 
     }
     

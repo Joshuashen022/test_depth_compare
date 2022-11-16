@@ -3,7 +3,7 @@ use serde::de::{SeqAccess, Visitor};
 use serde::{Deserialize, Deserializer, Serialize};
 use serde::de::DeserializeOwned;
 use std::collections::BTreeMap;
-use std::fmt;
+use std::fmt::{self, Debug, write};
 use std::time::{SystemTime, UNIX_EPOCH};
 use tracing::debug;
 use tokio_tungstenite::tungstenite;
@@ -32,14 +32,6 @@ pub fn heartbeat_respond(id: i64) -> Message{
     Message::from(inner)
 }
 
-pub fn order_respond(id: i64) -> Message{
-    let inner = HeartbeatRespond{
-        id,
-        method: String::from("public/respond-heartbeat"),
-    };
-    let inner = serde_json::to_string(&inner).unwrap();
-    Message::from(inner)
-}
 
 #[derive(Deserialize, Serialize)]
 pub struct OrderRequest{
@@ -162,7 +154,7 @@ pub struct BookEvent {
 
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Clone)]
 pub struct Data {
     /// Some timestamp server tells us
     #[serde(rename = "t")]
@@ -180,6 +172,18 @@ pub struct Data {
     pub asks: Vec<Quotes>,
 
     pub bids: Vec<Quotes>,
+}
+impl Debug for Data{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Data")
+        .field("publish_time", &self.publish_time)
+        .field("last_update_time", &self.last_update_time)
+        .field("update_sequence", &self.update_sequence)
+        .field("asks", &self.asks.len())
+        .field("bids", &self.bids.len())
+        .field("other", &self.other)
+        .finish()
+    }
 }
 
 #[derive(Debug, Copy, Clone)]
