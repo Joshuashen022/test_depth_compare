@@ -2,7 +2,12 @@ use tokio_tungstenite::{connect_async, tungstenite};
 use tungstenite::protocol::Message;
 use futures_util::{SinkExt, StreamExt};
 use url::Url;
-use crate::crypto::decoder::{OrderResponse, subscribe_message, LevelEventStream};
+use crate::crypto::decoder::{
+    OrderResponse, 
+    subscribe_message, heartbeat_respond,
+    LevelEventStream, HeartbeatRequest,
+    BookEvent, GeneralResponse
+};
 
 
 
@@ -28,8 +33,15 @@ pub async fn send_request(){
     };
 
     println!("send SUCCESS");
-
-    while let Ok(msg) = stream.next().await.unwrap() {
+    let mut confirmed = false;
+    let mut default_exit = 0;
+    while let Some(Ok(msg))= stream.next().await{
+        if default_exit == 5{
+            println!("using default exit");
+            break;
+        }
+        default_exit += 1;
+        
         if !msg.is_text() {
             println!("msg is empty");
             continue;
@@ -43,7 +55,62 @@ pub async fn send_request(){
             }
         };
 
-        let level_event: LevelEventStream = match serde_json::from_str(&text) {
+        let response: GeneralResponse = match serde_json::from_str(&text) {
+            Ok(response) => {
+                println!("Receive confirm message {:?}", response);
+                response
+            },
+            Err(e) => {
+                println!("Error {}, {:?}", e, msg);
+                continue;
+            }
+        };
+
+        match (response.method.as_str(), response.id){
+            ("public/heartbeat", _) => {
+                // wrap this in a async fn returns Result<>
+                // use ? to repplace match
+                let heartbeat_request: HeartbeatRequest = match serde_json::from_str(&text) {
+                    Ok(event) => {
+                        event
+                    },
+                    Err(e) => {
+                        println!("Error {}, {:?}", e, msg);
+                        continue;
+                    }
+                };
+                
+                println!("Receive {:?}", heartbeat_request);
+
+                let message = heartbeat_respond(heartbeat_request.id);
+                match stream.send(message).await{
+                    Ok(()) => (),
+                    Err(e) => println!("{:?}",e ),
+                };
+                
+            },
+            ("subscribe", 1)=> {
+                // wrap this in a async fn returns Result<>
+                // use ? to repplace match
+                let order_response: OrderResponse = match serde_json::from_str(&text) {
+                    Ok(event) => {
+                        event
+                    },
+                    Err(e) => {
+                        println!("Error {}, {:?}", e, msg);
+                        continue;
+                    }
+                };
+                println!("Receive {:?}, initialize success", order_response);
+            }, // initialize
+            ("subscribe", -1)=> (),// snapshot
+            _ => {
+                println!("Unknown respond {:?}", response);
+                continue;
+            },
+        }
+
+        let event: LevelEventStream<BookEvent> = match serde_json::from_str(&text) {
             Ok(event) => event,
             Err(e) => {
                 println!("Error {}, {:?}", e, msg);
@@ -51,17 +118,10 @@ pub async fn send_request(){
             }
         };
 
-        // let response = OrderResponse{id:0,code:0,method:String::from("subscribe")};
-        
-        level_event.debug();
-        
-        // if level_event.method == response.method {
-        //     println!("yes!");
-        //     break
-        // }
+        println!("receive BookEvent {}", event.method);
 
+    }
     
-    };
     
 }
 

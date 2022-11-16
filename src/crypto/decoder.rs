@@ -1,12 +1,45 @@
 use ordered_float::OrderedFloat;
 use serde::de::{SeqAccess, Visitor};
 use serde::{Deserialize, Deserializer, Serialize};
+use serde::de::DeserializeOwned;
 use std::collections::BTreeMap;
 use std::fmt;
 use std::time::{SystemTime, UNIX_EPOCH};
 use tracing::debug;
+use tokio_tungstenite::tungstenite;
+use tungstenite::protocol::Message;
 
+#[derive(Deserialize, Serialize, Debug)]
+pub struct HeartbeatRequest{
+    pub id: i64,
+    pub method:String,
+    pub code: i64,
+}
 
+#[derive(Deserialize, Serialize)]
+pub struct HeartbeatRespond{
+    pub id: i64,
+   
+    pub method:String,
+}
+
+pub fn heartbeat_respond(id: i64) -> Message{
+    let inner = HeartbeatRespond{
+        id,
+        method: String::from("public/respond-heartbeat"),
+    };
+    let inner = serde_json::to_string(&inner).unwrap();
+    Message::from(inner)
+}
+
+pub fn order_respond(id: i64) -> Message{
+    let inner = HeartbeatRespond{
+        id,
+        method: String::from("public/respond-heartbeat"),
+    };
+    let inner = serde_json::to_string(&inner).unwrap();
+    Message::from(inner)
+}
 
 #[derive(Deserialize, Serialize)]
 pub struct OrderRequest{
@@ -17,6 +50,13 @@ pub struct OrderRequest{
 #[derive(Deserialize, Serialize)]
 pub struct Params{
     pub channels:Vec<String>
+}
+
+#[derive(Deserialize, Serialize, PartialEq, Eq, Debug)]
+pub struct GeneralResponse{
+    pub id: i64,
+    pub code: i64,
+    pub method: String,
 }
 
 //Text("{\"id\":1,\"code\":0,\"method\":\"subscribe\",\"channel\":\"book.BTCUSD-PERP\"}")
@@ -57,7 +97,7 @@ pub struct Shared {
 
 
 #[derive(Deserialize, Debug)]
-pub struct LevelEventStream {
+pub struct LevelEventStream<Event> {
     /// Usually constant value `-1`
     pub id: i64,
 
@@ -70,27 +110,43 @@ pub struct LevelEventStream {
     pub result: Event,
 }
 
-impl LevelEventStream {
-    pub fn debug(&self) {
-        println!(
-            "receive level_event depth {}, data {}",
-            self.result.depth,
-            self.result.data.len(),
-        );
 
-        for data in self.result.data.clone() {
-            println!(
-                "bids {}, asks {}, time {}",
-                data.bids.len(),
-                data.asks.len(),
-                data.publish_time,
-            )
-        }
-    }
+#[derive(Deserialize, Debug, Clone)]
+pub struct TradeEvent{
+    pub channel: String,
+
+    pub subscription: String,
+
+    /// Something like "BTC_USDT"
+    pub instrument_name: String,
+
+    pub data: Vec<TradeData>,
 }
 
 #[derive(Deserialize, Debug, Clone)]
-pub struct Event {
+pub struct TradeData{
+    #[serde(rename = "s")]
+    pub side: String,
+
+    #[serde(rename = "p")]
+    pub price: String,
+
+    #[serde(rename = "q")]
+    pub quantity: String,
+    
+    #[serde(rename = "t")]
+    pub trade_time: i64,
+
+    #[serde(rename = "d")]
+    pub trade_id: String,
+
+    #[serde(rename = "i")]
+    pub instrument_name: String,
+}
+
+
+#[derive(Deserialize, Debug, Clone)]
+pub struct BookEvent {
 
     pub channel: String,
 
