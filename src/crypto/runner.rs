@@ -65,6 +65,7 @@ pub async fn send_request(){
             ("public/heartbeat", _) => {
                 // wrap this in a async fn returns Result<>
                 // use ? to repplace match
+            
                 let heartbeat_request: HeartbeatRequest = match serde_json::from_str(&text) {
                     Ok(event) => {
                         event
@@ -82,7 +83,7 @@ pub async fn send_request(){
                     Ok(()) => (),
                     Err(e) => println!("{:?}",e ),
                 };
-                
+                continue
             },
             ("subscribe", 1)=> {
                 // wrap this in a async fn returns Result<>
