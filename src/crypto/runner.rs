@@ -6,7 +6,7 @@ use crate::crypto::decoder::{
     OrderResponse, 
     subscribe_message, heartbeat_respond,
     LevelEventStream, HeartbeatRequest,
-    BookEvent, GeneralResponse
+    TradeEvent, GeneralResponse
 };
 
 
@@ -24,7 +24,7 @@ pub async fn send_request(){
     };
 
     println!("connection SUCCESS");
-    let channel = String::from("book.USDBTC-PERP");
+    let channel = String::from("trade.BTCUSD-PERP");
     let message = Message::from(subscribe_message(channel));
     
     match stream.send(message).await{
@@ -107,7 +107,7 @@ pub async fn send_request(){
             },
         }
 
-        let event: LevelEventStream<BookEvent> = match serde_json::from_str(&text) {
+        let event: LevelEventStream<TradeEvent> = match serde_json::from_str(&text) {
             Ok(event) => event,
             Err(e) => {
                 println!("Error {}, {:?}", e, msg);
@@ -115,7 +115,7 @@ pub async fn send_request(){
             }
         };
 
-        println!("receive BookEvent {:?}", event.data());
+        println!("receive TradeEvent {:?}", event.data());
 
     }
     

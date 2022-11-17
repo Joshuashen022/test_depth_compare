@@ -72,22 +72,6 @@ pub fn subscribe_message(channel: String) -> String{
     serde_json::to_string(&inner).unwrap()
 }
 
-pub fn subscribe_success() -> bool{
-    
-    false
-}
-
-
-pub struct Shared {
-    instrument: String,
-    last_update_id: i64,
-    send_time: i64,
-    receive_time: i64,
-    asks: BTreeMap<OrderedFloat<f64>, f64>,
-    bids: BTreeMap<OrderedFloat<f64>, f64>,
-}
-
-
 #[derive(Deserialize, Debug)]
 pub struct LevelEventStream<Event:EventT> {
     /// Usually constant value `-1`
@@ -158,29 +142,6 @@ pub struct TradeData{
     pub instrument_name: String,
 }
 
-
-#[derive(Deserialize, Debug, Clone)]
-pub struct BookEvent {
-
-    pub channel: String,
-
-    pub subscription: String,
-
-    /// Something like "BTC_USDT"
-    pub instrument_name: String,
-
-    pub data: Vec<Data>,
-
-    /// Usually constant value `20` or `50`
-    pub depth: i64,
-
-}
-impl EventT for BookEvent{
-    type Data = Data;
-    fn data(&self) -> &Vec<Self::Data> {
-        &self.data
-    }
-}
 #[derive(Deserialize, Clone)]
 pub struct Data {
     /// Some timestamp server tells us
