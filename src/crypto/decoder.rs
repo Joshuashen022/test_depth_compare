@@ -59,6 +59,15 @@ pub struct OrderResponse{
     pub channel: String,
 }
 
+#[derive(Deserialize, Serialize, PartialEq, Eq, Debug)]
+pub struct TradeResponse{
+    pub id: i64,
+    pub code: i64,
+    pub method: String,
+    pub channel: String,
+}
+
+
 pub fn subscribe_message(channel: String) -> String{
     let _time = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
     let inner = OrderRequest{

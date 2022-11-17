@@ -3,7 +3,7 @@ use tungstenite::protocol::Message;
 use futures_util::{SinkExt, StreamExt};
 use url::Url;
 use crate::crypto::decoder::{
-    OrderResponse, 
+     
     subscribe_message, heartbeat_respond,
     LevelEventStream, HeartbeatRequest,
     TradeEvent, GeneralResponse
@@ -88,7 +88,7 @@ pub async fn send_request(){
             ("subscribe", 1)=> {
                 // wrap this in a async fn returns Result<>
                 // use ? to repplace match
-                let order_response: OrderResponse = match serde_json::from_str(&text) {
+                let order_response: LevelEventStream<TradeEvent> = match serde_json::from_str(&text) {
                     Ok(event) => {
                         event
                     },
@@ -97,7 +97,9 @@ pub async fn send_request(){
                         continue;
                     }
                 };
-                println!("Receive {:?}, initialize success", order_response);
+                println!("Receive {:?}, initialize success with data len{}", 
+                    order_response.method, order_response.data().len()
+                );
                 continue;
             }, // initialize
             ("subscribe", -1)=> (),// snapshot
