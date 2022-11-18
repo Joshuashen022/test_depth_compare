@@ -22,7 +22,7 @@ pub async fn send_request(){
     println!("connection SUCCESS");
 
     while let Some(Ok(msg))= stream.next().await{
-        
+        println!("receive SUCCESS");
         
         if !msg.is_text() {
             println!("msg is empty");
