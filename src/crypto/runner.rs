@@ -2,19 +2,15 @@ use tokio_tungstenite::{connect_async, tungstenite};
 use tungstenite::protocol::Message;
 use futures_util::{SinkExt, StreamExt};
 use url::Url;
-use crate::crypto::decoder::{
-     
-    subscribe_message, heartbeat_respond,
-    LevelEventStream, HeartbeatRequest,
-    TradeEvent, GeneralResponse
+use crate::crypto::ticker_decoder::{
+    EventTicker
 };
 
-
-
+// const TRADE_URL_PC: &str =      "wss://dstream.binance.com/stream?streams=btcusd_221230@trade";
+// const TRADE_URL_PU: &str =      "wss://fstream.binance.com/stream?streams=btcusdt@trade";
+const TRADE_URL_SPOT: &str =    "wss://stream.binance.com:9443/ws/bnbbtc@trade";
 pub async fn send_request(){
-    
-    const LEVEL_DEPTH_URL: &str = "wss://stream.crypto.com/v2/market";
-    let url = Url::parse(LEVEL_DEPTH_URL).expect("Bad URL");
+    let url = Url::parse(TRADE_URL_SPOT).expect("Bad URL");
     let mut stream = match connect_async(url).await {
         Ok((connection, _)) => connection,
         Err(e) => {
@@ -24,15 +20,6 @@ pub async fn send_request(){
     };
 
     println!("connection SUCCESS");
-    let channel = String::from("trade.BTCUSD-PERP");
-    let message = Message::from(subscribe_message(channel));
-    
-    match stream.send(message).await{
-        Ok(()) => (),
-        Err(e) => println!("{:?}",e ),
-    };
-
-    println!("send SUCCESS");
 
     while let Some(Ok(msg))= stream.next().await{
         
@@ -50,7 +37,7 @@ pub async fn send_request(){
             }
         };
 
-        let response: GeneralResponse = match serde_json::from_str(&text) {
+        let response: EventTicker = match serde_json::from_str(&text) {
             Ok(response) => {
                 // println!("Receive confirm message {:?}", response);
                 response
@@ -61,72 +48,10 @@ pub async fn send_request(){
             }
         };
 
-        match (response.method.as_str(), response.id){
-            ("public/heartbeat", _) => {
-                // wrap this in a async fn returns Result<>
-                // use ? to repplace match
-            
-                let heartbeat_request: HeartbeatRequest = match serde_json::from_str(&text) {
-                    Ok(event) => {
-                        event
-                    },
-                    Err(e) => {
-                        println!("Error {}, {:?}", e, msg);
-                        continue;
-                    }
-                };
-                
-                println!("Receive {:?}", heartbeat_request);
-
-                let message = heartbeat_respond(heartbeat_request.id);
-                match stream.send(message).await{
-                    Ok(()) => (),
-                    Err(e) => println!("{:?}",e ),
-                };
-                continue
-            },
-            ("subscribe", 1)=> {
-                // wrap this in a async fn returns Result<>
-                // use ? to repplace match
-                let order_response: LevelEventStream<TradeEvent> = match serde_json::from_str(&text) {
-                    Ok(event) => {
-                        event
-                    },
-                    Err(e) => {
-                        println!("Error {}, {:?}", e, msg);
-                        continue;
-                    }
-                };
-                println!("Receive {:?}, initialize success with data len{}", 
-                    order_response.method, order_response.data().len()
-                );
-                continue;
-            }, // initialize
-            ("subscribe", -1)=> (),// snapshot
-            _ => {
-                println!("Unknown respond {:?}", response);
-                continue;
-            },
-        }
-
-        let event: LevelEventStream<TradeEvent> = match serde_json::from_str(&text) {
-            Ok(event) => event,
-            Err(e) => {
-                println!("Error {}, {:?}", e, msg);
-                continue;
-            }
-        };
-
-        println!("receive TradeEvent {:?}", event.data());
+        println!("receive TradeEvent {:?}", response);
 
     }
     
     
 }
 
-
-#[test]
-fn subscribe_message_out(){
-    let channel = String::from("book.BTCUSD-PERP");
-    println!("{}", subscribe_message(channel));
-}
