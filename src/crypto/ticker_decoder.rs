@@ -24,5 +24,5 @@ pub struct EventTicker {
     #[serde(rename = "m")]
     pub direction: bool,
     #[serde(rename = "M")]
-    pub other: i64,
+    pub other: bool,
 }
