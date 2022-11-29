@@ -20,7 +20,9 @@ pub async fn send_request(){
     let body = serde_json::to_string(&order).unwrap();
     let res = client.post(url).body(body).send().await.unwrap();
     let head = res.headers().iter();
-    println!("head {:?}", head);
+    for v in head{
+        println!("head {:?}", v);
+    }
     println!("Done");
 }
 
