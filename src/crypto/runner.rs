@@ -1,5 +1,5 @@
 use tokio_tungstenite::{connect_async, tungstenite};
-
+use hex::encode;
 use sha2::Sha256;
 use hmac::{Hmac, Mac};
 use reqwest;
@@ -27,14 +27,14 @@ pub async fn send_request(){
     let order = BinanceOrder::new_default();
     
     let body = order.into_str();
-    let url_str = format!("{}{}",TRADE_URL_SPOT, api_a);
-
-    let url = Url::parse(&url_str).expect("Bad URL");
 
     let mut mac = HmacSha256::new_from_slice(SECRET_KEY.as_bytes()).unwrap();
     mac.update(body.as_bytes());
-    let res = mac.finalize().into_bytes();
-    
+    let hash_bytes = mac.finalize().into_bytes();
+    let hash = encode(hash_bytes);
+
+    let url_str = format!("{}{}&signature={}", TRADE_URL_SPOT, api_a, hash);
+    let url = Url::parse(&url_str).expect("Bad URL");
     let res = client.post(url).header("X-MBX-APIKEY", ACCESS_KEY)
     .body(body)
     .send().await.unwrap()
