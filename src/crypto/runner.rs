@@ -18,7 +18,9 @@ pub async fn send_request(){
     let client = reqwest::Client::new();
     let order = BinanceOrder::new();
     let body = serde_json::to_string(&order).unwrap();
-    client.post(url).body(body).send().await.unwrap();
+    let res = client.post(url).body(body).send().await.unwrap();
+    let head = res.headers().iter();
+    println!("head {:?}", head);
     println!("Done");
 }
 
