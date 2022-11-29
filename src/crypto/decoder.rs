@@ -1,3 +1,5 @@
+use std::fmt::format;
+
 // use ordered_float::OrderedFloat;
 // use serde::de::{SeqAccess, Visitor};
 use serde::{Deserialize, Serialize};
@@ -57,9 +59,9 @@ pub struct BinanceOrder{
 
 impl BinanceOrder{
 
-    pub fn new() -> Self{
+    pub fn new_default() -> Self{
         BinanceOrder{
-            symbol: String::from("BTCUSDT"),
+            symbol: String::from("BUSDUSDT"),
             side: Side::Buy,
             order_type: OrderType::LimitMaker,
             time_in_force: None,
@@ -76,6 +78,11 @@ impl BinanceOrder{
             recv_window: None,
             timestamp: 0,
         }
+    }
+    //"symbol=BUSDUSDT&side=BUY&type=LIMIT&timeInForce=GTC&quantity=1&price=0.1&recvWindow=5000&timestamp=1499827319559"
+
+    pub fn into_str(self) -> String{
+        String::from("symbol=BUSDUSDT&side=BUY&type=LIMIT&timeInForce=GTC&quantity=1&price=0.1&recvWindow=5000&timestamp=1499827319559")
     }
 }
 
@@ -129,14 +136,34 @@ pub enum NewOrderRespType{
 #[cfg(test)]
 mod test{
     use super::*;
+    use sha2::Sha256;
+    use hmac::{Hmac, Mac};
+    use hex_literal::hex;
 
     #[test]
     fn test_none_serde(){
         
-        let binance_order = BinanceOrder::new();
+        let binance_order = BinanceOrder::new_default();
 
         let serde_str = serde_json::to_string(&binance_order).unwrap();
         println!("{}", serde_str) ;
+    }
+
+    #[test]
+    fn sha256_test(){
+        type HmacSha256 = Hmac<Sha256>;
+        let input = b"NhqPtmdSJYdKjVHjA7PZj4Mge3R5YNiP1e3UZjInClVN65XAbvqqM6A7H5fATj0j";
+        let info2 = b"symbol=LTCBTC&side=BUY&type=LIMIT&timeInForce=GTC&quantity=1&price=0.1&recvWindow=5000&timestamp=1499827319559";
+        let mut mac = HmacSha256::new_from_slice(input).unwrap();
+
+        mac.update(info2);
+        let result = mac.finalize().into_bytes();
+
+        assert_eq!(
+            result[..], 
+            hex!("c8db56825ae71d6d79447849e617115f4a920fa2acdcab2b053c4b2838bd6b71")[..]
+        );
+
     }
 
 }
