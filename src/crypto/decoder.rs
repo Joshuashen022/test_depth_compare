@@ -138,7 +138,7 @@ mod test{
     use super::*;
     use sha2::Sha256;
     use hmac::{Hmac, Mac};
-    use hex_literal::hex;
+    use hex::encode;
 
     #[test]
     fn test_none_serde(){
@@ -158,10 +158,11 @@ mod test{
 
         mac.update(info2);
         let result = mac.finalize().into_bytes();
-
+        let result = encode(result);
+        
         assert_eq!(
-            result[..], 
-            hex!("c8db56825ae71d6d79447849e617115f4a920fa2acdcab2b053c4b2838bd6b71")[..]
+            result, 
+            String::from("c8db56825ae71d6d79447849e617115f4a920fa2acdcab2b053c4b2838bd6b71")
         );
 
     }
