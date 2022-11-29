@@ -3,10 +3,11 @@ mod crypto_decode;
 mod crypto;
 
 use deep::{LevelEvent, Event, BinanceSpotOrderBookSnapshot, get_infustructure, DepthRow};
+use serde::de::Error;
 use tokio_tungstenite::connect_async;
 use url::Url;
 use futures_util::StreamExt;
-use std::{time::Instant};
+use std::{time::Instant, borrow::Cow, ops::Deref};
 use crypto::runner::send_request;
 const LEVEL_DEPTH_URL: &str = "wss://stream.binance.com:9443/ws/bnbbtc@depth20@100ms";
 // const MAX_BUFFER: usize = 30;
@@ -273,5 +274,47 @@ fn dynamic_box(){
         
     //     let _ = be_cat().moew();
     // });
+    
+}
+
+#[test]
+fn csv_example() -> Result<(), Box<dyn std::error::Error>>{
+    use csv::Writer;
+    use serde::Serialize;
+
+    #[derive(Serialize)]
+    struct Row<'a>{
+        city: &'a str,
+        country: &'a str,
+        population: i64,
+    }
+    let i = 5;
+    let mut wtr = Writer::from_path("abc")?;
+    // let string_city = format!("a,{i}", );
+    let city = "a {i}";
+    for _ in 0..5{
+        
+        let r2 = Row{
+            city, 
+            country: "b", 
+            population: 10
+        };
+        wtr.serialize(r2)?;
+        wtr.flush()?;
+    }
+    
+    Ok(())
+}
+
+
+#[test]
+fn trait_example() {
+    #[derive(Debug, Clone, Copy)]
+    pub struct Quote {
+        pub price: f64,
+        pub amount: f64,
+    }
+    
+
     
 }
