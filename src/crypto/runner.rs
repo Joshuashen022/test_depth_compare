@@ -24,8 +24,8 @@ pub async fn send_request() {
     let client = reqwest::Client::new();
     let order = BinanceOrder::new_default();
 
-    // let body = order.into_string();
-    let body = String::new();
+    let body = order.into_string();
+    // let body = String::new();
     let hasher = Hasher{
         api_key: ACCESS_KEY.to_string(),
         secret_key: SECRET_KEY.to_string(),
