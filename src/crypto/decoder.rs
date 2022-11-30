@@ -48,7 +48,7 @@ impl BinanceDeleteOrder {
 
     pub fn into_string(&self) -> String {
 
-        let symbol = "USDTBUSD";
+        let symbol = "BUSDUSDT";
         let order_id = 785149107;
         let origin_client_order_id = "UpVFUJFkT10UuL6D9thbCc";
         // let new_client_order_id = 5000; // newClientOrderId
