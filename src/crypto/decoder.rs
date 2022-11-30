@@ -1,4 +1,4 @@
-use std::fmt::format;
+use super::runner::*;
 
 // use ordered_float::OrderedFloat;
 // use serde::de::{SeqAccess, Visitor};
@@ -15,68 +15,83 @@ use hmac::{Hmac, Mac};
 use sha2::Sha256;
 type HmacSha256 = Hmac<Sha256>;
 
+
+//"{
+//  \"symbol\":\"BUSDUSDT\",\"orderId\":785149107,\"orderListId\":-1,
+//  \"clientOrderId\":\"UpVFUJFkT10UuL6D9thbCc\",\"transactTime\":1669789200380,
+//  \"price\":\"1.00000000\",\"origQty\":\"10.00000000\",\"executedQty\":\"0.00000000\",
+//  \"cummulativeQuoteQty\":\"0.00000000\",\"status\":\"NEW\",\"timeInForce\":\"GTC\",\"type\":\"LIMIT\",\"side\":\"BUY\",\"fills\":[]
+//}"
+
+
 #[derive(Clone, Deserialize, Serialize)]
-pub struct BinanceOrder {
+pub struct BinanceDeleteOrder{
     symbol: String,
-
-    side: Side,
-
-    #[serde(rename = "type")]
-    order_type: OrderType,
-
-    #[serde(rename = "timeInForce")]
-    time_in_force: Option<TimeInForce>,
-
-    quantity: Option<i64>,
-
-    #[serde(rename = "quoteOrderQty")]
-    quote_order_qty: Option<i64>,
-
-    price: Option<i64>,
-
-    #[serde(rename = "newClientOrderId")]
-    new_client_order_id: Option<String>,
-
-    #[serde(rename = "stopPrice")]
-    stop_price: Option<i64>,
-
-    #[serde(rename = "trailingDelta")]
-    trailing_delta: Option<i64>,
-
-    #[serde(rename = "icebergQty")]
-    iceberg_qty: Option<i64>,
-
-    #[serde(rename = "newOrderRespType")]
-    new_order_resp_type: Option<NewOrderRespType>,
-
-    #[serde(rename = "strategyId")]
-    strategy_id: Option<i64>,
-
-    #[serde(rename = "strategyType")]
-    strategy_type: Option<i64>,
-
-    #[serde(rename = "recvWindow")]
-    recv_window: Option<i64>,
-
+    order_id: i64,
+    origin_client_order_id: String,
+    new_client_order_id: String,
+    receive_window: i64,
     timestamp: i64,
 }
 
+impl BinanceDeleteOrder {
+    pub fn new() -> Self {
+        BinanceDeleteOrder{
+            symbol: String::new(),
+            order_id:0,
+            origin_client_order_id: String::new(),
+            new_client_order_id: String::new(),
+            receive_window: 0,
+            timestamp: 0,
+        }
+    }
+
+    pub fn into_string(&self) -> String {
+
+        let symbol = "USDTBUSD";
+        let order_id = 785149107;
+        let origin_client_order_id = "UpVFUJFkT10UuL6D9thbCc";
+        // let new_client_order_id = 5000; // newClientOrderId
+        let receive_window = 5000;
+        let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
+
+        format!(
+            "symbol={}&orderId={}&origClientOrderId={}&recvWindow={}&timestamp={}", 
+            symbol, order_id, origin_client_order_id, receive_window, now.as_millis() as i64
+        )
+    }
+
+    pub fn get_body(&self) -> String {
+        let params = self.into_string();
+    
+        let hasher = Hasher{
+            api_key: ACCESS_KEY.to_string(),
+            secret_key: SECRET_KEY.to_string(),
+            raw_message: params.clone(),
+        };
+    
+        let hash = hasher.hash();
+    
+        format!("{}&signature={}", params, hash)
+    }
+
+}
 
 #[derive(Clone, Deserialize, Serialize, Debug)]
-pub struct BinanceOrderResponse {
+pub struct BinanceDeleteOrderResponse {
     symbol: String,
+
+    #[serde(rename = "origClientOrderId")]
+    origin_client_order_id: String,
 
     #[serde(rename = "orderId")]
     order_id: i64,
 
     #[serde(rename = "orderListId")]
     order_list_id: i64,
-    
+
     #[serde(rename = "clientOrderId")]
     client_order_id: String,
-
-    #[serde(rename = "transactTime")]
-    transaction_time: i64,
 
     price: String,
 
@@ -103,6 +118,7 @@ pub struct BinanceOrderResponse {
 }
 
 
+
 pub struct Hasher{
     pub secret_key: String,
     pub api_key: String,
@@ -121,105 +137,14 @@ impl Hasher{
 
 }
 
-impl BinanceOrder {
-    pub fn new_default() -> Self {
-        BinanceOrder {
-            symbol: String::from("BUSDUSDT"),
-            side: Side::Buy,
-            order_type: OrderType::LimitMaker,
-            time_in_force: None,
-            quantity: None,
-            quote_order_qty: None,
-            price: None,
-            new_client_order_id: None,
-            stop_price: None,
-            trailing_delta: None,
-            iceberg_qty: None,
-            new_order_resp_type: None,
-            strategy_id: None,
-            strategy_type: None,
-            recv_window: None,
-            timestamp: 0,
-        }
-    }
-    //"symbol=BUSDUSDT&side=BUY&type=LIMIT&timeInForce=GTC&quantity=1&price=0.1&recvWindow=5000&timestamp=1499827319559"
 
-    pub fn into_string(self) -> String {
 
-        let symbol = "USDTBUSD";
-        let side = "BUY";
-        let order_type = "LIMIT";
-        let recv_window = 5000;
-        let quantityt = 10;
-        let time_in_force = "GTC";
-        let price = 1.0;
-        let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
-
-        format!(
-            "symbol={}&side={}&type={}&timeInForce={}&quantity={}&price={}&recvWindow={}&timestamp={}", 
-            symbol, side, order_type, time_in_force, quantityt, price, recv_window, now.as_millis() as i64
-        )
-    }
-}
-
-#[derive(Clone, Deserialize, Serialize)]
-pub enum Side {
-    #[serde(rename = "BUY")]
-    Buy,
-    #[serde(rename = "SELL")]
-    Sell,
-}
-
-#[derive(Clone, Deserialize, Serialize)]
-pub enum OrderType {
-    #[serde(rename = "LIMIT")]
-    Limit,
-    #[serde(rename = "MARKET")]
-    Maket,
-    #[serde(rename = "STOP_LOSS")]
-    StopLoss,
-    #[serde(rename = "STOP_LOSS_LIMIT")]
-    StopLossLimit,
-    #[serde(rename = "TAKE_PROFIT")]
-    TakeProfit,
-    #[serde(rename = "TAKE_PROFIT_LIMIT")]
-    TakeProfitLimit,
-    #[serde(rename = "LIMIT_MAKER")]
-    LimitMaker,
-}
-
-#[derive(Clone, Deserialize, Serialize)]
-pub enum TimeInForce {
-    /// Stop until success
-    GTC,
-    /// Stop if can't success inmediately
-    /// Make as much as order as possible
-    IOC,
-    /// Stop if can't success all
-    FOK,
-}
-
-#[derive(Clone, Deserialize, Serialize)]
-pub enum NewOrderRespType {
-    ACK,
-    RESULT,
-    FULL,
-}
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use hex::encode;
     use hmac::{Hmac, Mac};
     use sha2::Sha256;
-
-    #[test]
-    fn test_none_serde() {
-        let binance_order = BinanceOrder::new_default();
-
-        let serde_str = serde_json::to_string(&binance_order).unwrap();
-        println!("{}", serde_str);
-    }
 
     #[test]
     fn sha256_test() {

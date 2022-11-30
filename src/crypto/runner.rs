@@ -1,4 +1,4 @@
-use super::decoder::{BinanceOrder, Hasher, BinanceOrderResponse};
+use super::decoder::{BinanceDeleteOrder, BinanceDeleteOrderResponse};
 use reqwest;
 use url::Url;
 
@@ -8,31 +8,33 @@ const TRADE_URL_SPOT: &str = "https://api.binance.com";
 // const TRADE_URL_SPOT_1: &str =    "https://api1.binance.com";
 // const API_ORDER_TEST : &str = "/api/v3/order/test";
 const API_ORDER : &str = "/api/v3/order";
-const ACCESS_KEY: &str = "nifNGIXIzco8YXe3PpuD0zMXvJN33WpWdNNxHl1GLb1JIS5n9TttdcIxlZnHQhGA";
-const SECRET_KEY: &str = "atl3kPizvOkgM366O2OPbotuQpbWIxH2M4IEbvAwwqxey6amjKODfb0mBsVNpji1";
+pub const ACCESS_KEY: &str = "nifNGIXIzco8YXe3PpuD0zMXvJN33WpWdNNxHl1GLb1JIS5n9TttdcIxlZnHQhGA";
+pub const SECRET_KEY: &str = "atl3kPizvOkgM366O2OPbotuQpbWIxH2M4IEbvAwwqxey6amjKODfb0mBsVNpji1";
 
 pub async fn send_request() {
-    let client = reqwest::Client::new();
 
     let url_str = format!("{}{}", TRADE_URL_SPOT, API_ORDER,);
-    let url = Url::parse(&url_str).expect("Bad URL");
-    let order = BinanceOrder::new_default();
-    let params = order.into_string();
     
-    let hasher = Hasher{
-        api_key: ACCESS_KEY.to_string(),
-        secret_key: SECRET_KEY.to_string(),
-        raw_message: params.clone(),
-    };
-
-    let hash = hasher.hash();
-
-    let body = format!("{}&signature={}", params, hash);
+    let order = BinanceDeleteOrder::new();
+    let body = order.get_body();
     
     println!("url: {}", url_str);
     println!("body: {}", body);
 
-    let res = client
+    let res = place_order(url_str, body).await;
+
+    println!("client {:?}", res);
+
+    let after: BinanceDeleteOrderResponse = serde_json::from_str(&res).unwrap();
+    println!("after {:?}", after);
+    println!("Done");
+
+}
+
+async fn place_order(url: String, body: String) -> String {
+    let url = Url::parse(&url).expect("Bad URL");
+    let client = reqwest::Client::new();
+    client
         .post(url)
         .header("X-MBX-APIKEY", ACCESS_KEY)
         .body(body)
@@ -41,11 +43,20 @@ pub async fn send_request() {
         .unwrap()
         .text()
         .await
-        .unwrap();
+        .unwrap()
+}
 
-    println!("client {:?}", res);
-
-    let after: BinanceOrderResponse = serde_json::from_str(&res).unwrap();
-    println!("after {:?}", after);
-    println!("Done");
+async fn delete_order(url: String, body: String) -> String {
+    let url = Url::parse(&url).expect("Bad URL");
+    let client = reqwest::Client::new();
+    client
+        .delete(url)
+        .header("X-MBX-APIKEY", ACCESS_KEY)
+        .body(body)
+        .send()
+        .await
+        .unwrap()
+        .text()
+        .await
+        .unwrap()
 }
