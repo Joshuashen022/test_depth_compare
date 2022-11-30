@@ -25,22 +25,16 @@ type HmacSha256 = Hmac<Sha256>;
 
 
 #[derive(Clone, Deserialize, Serialize)]
-pub struct BinanceDeleteOrder{
+pub struct BinanceDeleteAllOrder{
     symbol: String,
-    order_id: i64,
-    origin_client_order_id: String,
-    new_client_order_id: String,
     receive_window: i64,
     timestamp: i64,
 }
 
-impl BinanceDeleteOrder {
+impl BinanceDeleteAllOrder {
     pub fn new() -> Self {
-        BinanceDeleteOrder{
+        BinanceDeleteAllOrder{
             symbol: String::new(),
-            order_id:0,
-            origin_client_order_id: String::new(),
-            new_client_order_id: String::new(),
             receive_window: 0,
             timestamp: 0,
         }
@@ -49,15 +43,13 @@ impl BinanceDeleteOrder {
     pub fn into_string(&self) -> String {
 
         let symbol = "BUSDUSDT";
-        let order_id = 785149107;
-        let origin_client_order_id = "UpVFUJFkT10UuL6D9thbCc";
         // let new_client_order_id = 5000; // newClientOrderId
         let receive_window = 5000;
         let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
 
         format!(
-            "symbol={}&orderId={}&origClientOrderId={}&recvWindow={}&timestamp={}", 
-            symbol, order_id, origin_client_order_id, receive_window, now.as_millis() as i64
+            "symbol={}&recvWindow={}&timestamp={}", 
+            symbol, receive_window, now.as_millis() as i64
         )
     }
 

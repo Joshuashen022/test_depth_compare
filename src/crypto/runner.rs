@@ -1,4 +1,4 @@
-use super::decoder::{BinanceDeleteOrder, BinanceDeleteOrderResponse};
+use super::decoder::{BinanceDeleteAllOrder, BinanceDeleteOrderResponse};
 use reqwest;
 use url::Url;
 
@@ -15,7 +15,7 @@ pub async fn send_request() {
 
     let url_str = format!("{}{}", TRADE_URL_SPOT, API_ORDER,);
     
-    let order = BinanceDeleteOrder::new();
+    let order = BinanceDeleteAllOrder::new();
     let body = order.get_body();
     
     println!("url: {}", url_str);
