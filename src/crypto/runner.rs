@@ -1,4 +1,4 @@
-use super::decoder::{BinanceOrder, Hasher};
+use super::decoder::{BinanceOrder, Hasher, BinanceOrderResponse};
 use reqwest;
 use url::Url;
 
@@ -32,7 +32,6 @@ pub async fn send_request() {
     println!("url: {}", url_str);
     println!("body: {}", body);
 
-
     let res = client
         .post(url)
         .header("X-MBX-APIKEY", ACCESS_KEY)
@@ -45,5 +44,8 @@ pub async fn send_request() {
         .unwrap();
 
     println!("client {:?}", res);
+
+    let after: BinanceOrderResponse = serde_json::from_str(&res).unwrap();
+    println!("after {:?}", after);
     println!("Done");
 }

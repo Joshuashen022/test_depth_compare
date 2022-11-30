@@ -61,6 +61,48 @@ pub struct BinanceOrder {
     timestamp: i64,
 }
 
+
+#[derive(Clone, Deserialize, Serialize, Debug)]
+pub struct BinanceOrderResponse {
+    symbol: String,
+
+    #[serde(rename = "orderId")]
+    order_id: i64,
+
+    #[serde(rename = "orderListId")]
+    order_list_id: i64,
+    
+    #[serde(rename = "clientOrderId")]
+    client_order_id: String,
+
+    #[serde(rename = "transactTime")]
+    transaction_time: i64,
+
+    price: String,
+
+    #[serde(rename = "origQty")]
+    origin_qty: String,
+
+    #[serde(rename = "executedQty")]
+    executed_qty: String,
+
+    #[serde(rename = "cummulativeQuoteQty")]
+    cummulative_quote_qty: String,
+
+    status: String,
+
+    #[serde(rename = "timeInForce")]
+    time_in_force: String,
+
+    #[serde(rename = "type")]
+    order_type: String,
+
+    side: String,
+
+    // fills:Vec<i64>,
+}
+
+
 pub struct Hasher{
     pub secret_key: String,
     pub api_key: String,
@@ -104,7 +146,7 @@ impl BinanceOrder {
 
     pub fn into_string(self) -> String {
 
-        let symbol = "BUSDUSDT";
+        let symbol = "USDTBUSD";
         let side = "BUY";
         let order_type = "LIMIT";
         let recv_window = 5000;
