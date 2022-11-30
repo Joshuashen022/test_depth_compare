@@ -1,4 +1,4 @@
-use super::decoder::BinanceOrder;
+use super::decoder::{BinanceOrder, Hasher};
 use futures_util::{SinkExt, StreamExt};
 use hex::encode;
 use hmac::{Hmac, Mac};
@@ -24,15 +24,18 @@ pub async fn send_request() {
     let client = reqwest::Client::new();
     let order = BinanceOrder::new_default();
 
-    let body = order.into_str();
+    // let body = order.into_string();
+    let body = String::new();
+    let hasher = Hasher{
+        api_key: ACCESS_KEY.to_string(),
+        secret_key: SECRET_KEY.to_string(),
+        raw_message: body.clone(),
+    };
 
-    let mut mac = HmacSha256::new_from_slice(SECRET_KEY.as_bytes()).unwrap();
-    mac.update(body.as_bytes());
-    let hash_bytes = mac.finalize().into_bytes();
-    let hash = encode(hash_bytes);
+    let hash = hasher.hash();
 
     let url_str = format!("{}{}{}&signature={}", TRADE_URL_SPOT, api_a, body, hash);
-
+    // let url_str = format!("{}{}{}&signature={}", TRADE_URL_SPOT, api_a, body, hash);
     println!("url: {}", url_str);
     let url = Url::parse(&url_str).expect("Bad URL");
     let res = client

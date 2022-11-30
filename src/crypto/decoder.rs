@@ -9,6 +9,11 @@ use serde::{Deserialize, Serialize};
 use std::time::{SystemTime, UNIX_EPOCH};
 // use tokio_tungstenite::tungstenite;
 // use tungstenite::protocol::Message;
+use hex::encode;
+use hmac::{Hmac, Mac};
+use reqwest;
+use sha2::Sha256;
+type HmacSha256 = Hmac<Sha256>;
 
 #[derive(Clone, Deserialize, Serialize)]
 pub struct BinanceOrder {
@@ -56,6 +61,24 @@ pub struct BinanceOrder {
     timestamp: i64,
 }
 
+pub struct Hasher{
+    pub secret_key: String,
+    pub api_key: String,
+    pub raw_message: String,
+}
+
+impl Hasher{
+
+    pub fn hash(&self) -> String{
+        
+        let mut mac = HmacSha256::new_from_slice(self.secret_key.as_bytes()).unwrap();
+        mac.update(self.raw_message.as_bytes());
+        let hash_bytes = mac.finalize().into_bytes();
+        encode(hash_bytes)
+    }
+
+}
+
 impl BinanceOrder {
     pub fn new_default() -> Self {
         BinanceOrder {
@@ -79,7 +102,7 @@ impl BinanceOrder {
     }
     //"symbol=BUSDUSDT&side=BUY&type=LIMIT&timeInForce=GTC&quantity=1&price=0.1&recvWindow=5000&timestamp=1499827319559"
 
-    pub fn into_str(self) -> String {
+    pub fn into_string(self) -> String {
 
         let symbol = "BUSDUSDT";
         let side = "BUY";
