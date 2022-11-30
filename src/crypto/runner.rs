@@ -1,4 +1,4 @@
-use super::decoder::{BinanceDeleteAllOrder, BinanceDeleteAllOrderResponse};
+use super::decoder::{BinanceCheckOrder, BinanceCheckOrderResponse};
 use reqwest;
 use url::Url;
 
@@ -16,27 +16,27 @@ pub async fn send_request() {
 
     let url_str = format!("{}{}", TRADE_URL_SPOT, API_OPEN_ORDERS);
     
-    let order = BinanceDeleteAllOrder::new();
+    let order = BinanceCheckOrder::new();
     let body = order.get_body();
     
     println!("url: {}", url_str);
     println!("body: {}", body);
 
-    let res = delete_order(url_str, body).await;
+    let res = check_order(url_str, body).await;
 
     println!("client {:?}", res);
 
-    let after: BinanceDeleteAllOrderResponse = serde_json::from_str(&res).unwrap();
+    let after: BinanceCheckOrderResponse = serde_json::from_str(&res).unwrap();
     println!("after {:?}", after);
     println!("Done");
 
 }
 
-async fn delete_order(url: String, body: String) -> String {
+async fn check_order(url: String, body: String) -> String {
     let url = Url::parse(&url).expect("Bad URL");
     let client = reqwest::Client::new();
     client
-        .delete(url)
+        .get(url)
         .header("X-MBX-APIKEY", ACCESS_KEY)
         .body(body)
         .send()

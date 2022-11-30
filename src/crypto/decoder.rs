@@ -19,16 +19,20 @@ type HmacSha256 = Hmac<Sha256>;
 
 
 #[derive(Clone, Deserialize, Serialize)]
-pub struct BinanceDeleteAllOrder{
+pub struct BinanceCheckOrder{
     symbol: String,
+    order_id: i64,
+    orgin_client_order_id: String,
     receive_window: i64,
     timestamp: i64,
 }
 
-impl BinanceDeleteAllOrder {
+impl BinanceCheckOrder {
     pub fn new() -> Self {
-        BinanceDeleteAllOrder{
+        BinanceCheckOrder{
             symbol: String::new(),
+            order_id: 0,
+            orgin_client_order_id: String::new(),
             receive_window: 0,
             timestamp: 0,
         }
@@ -37,13 +41,14 @@ impl BinanceDeleteAllOrder {
     pub fn into_string(&self) -> String {
 
         let symbol = "BUSDUSDT";
-        // let new_client_order_id = 5000; // newClientOrderId
+        let order_id = 0;
+        let orgin_client_order_id = "";
         let receive_window = 5000;
         let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
 
         format!(
-            "symbol={}&recvWindow={}&timestamp={}", 
-            symbol, receive_window, now.as_millis() as i64
+            "symbol={}&orderId={}&origClientOrderId={}&recvWindow={}&timestamp={}", 
+            symbol, order_id, orgin_client_order_id, receive_window, now.as_millis() as i64
         )
     }
 
@@ -68,15 +73,10 @@ impl BinanceDeleteAllOrder {
 // \"price\":\"1.00000000\",\"origQty\":\"10.00000000\",\"executedQty\":\"0.00000000\",
 // \"cummulativeQuoteQty\":\"0.00000000\",\"status\":\"CANCELED\",\"timeInForce\":\"GTC\",
 // \"type\":\"LIMIT\",\"side\":\"BUY\"}]"
-#[derive(Clone, Deserialize, Serialize, Debug)]
-pub struct BinanceDeleteAllOrderResponse(Vec<BinanceDeleteOrderResponse>);
 
 #[derive(Clone, Deserialize, Serialize, Debug)]
-pub struct BinanceDeleteOrderResponse {
+pub struct BinanceCheckOrderResponse {
     symbol: String,
-
-    #[serde(rename = "origClientOrderId")]
-    origin_client_order_id: String,
 
     #[serde(rename = "orderId")]
     order_id: i64,
@@ -108,10 +108,24 @@ pub struct BinanceDeleteOrderResponse {
 
     side: String,
 
-    // fills:Vec<i64>,
+    #[serde(rename = "stopPrice")]
+    stop_price:String,
+    
+    #[serde(rename = "icebergQty")]
+    iceberg_qty:String,
+
+    time: i64,
+
+    #[serde(rename = "updateTime")]
+    update_time: i64,
+
+    #[serde(rename = "isWorking")]
+    is_working: i64,
+
+    #[serde(rename = "origQuoteOrderQty")]
+    origin_quote_order_qty: String,
+
 }
-
-
 
 pub struct Hasher{
     pub secret_key: String,
