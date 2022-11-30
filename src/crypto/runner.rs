@@ -1,4 +1,4 @@
-use super::decoder::{BinanceDeleteAllOrder, BinanceDeleteOrderResponse};
+use super::decoder::{BinanceDeleteAllOrder, BinanceDeleteAllOrderResponse};
 use reqwest;
 use url::Url;
 
@@ -26,7 +26,7 @@ pub async fn send_request() {
 
     println!("client {:?}", res);
 
-    let after: BinanceDeleteOrderResponse = serde_json::from_str(&res).unwrap();
+    let after: BinanceDeleteAllOrderResponse = serde_json::from_str(&res).unwrap();
     println!("after {:?}", after);
     println!("Done");
 

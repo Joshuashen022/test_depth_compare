@@ -16,12 +16,6 @@ use sha2::Sha256;
 type HmacSha256 = Hmac<Sha256>;
 
 
-//"{
-//  \"symbol\":\"BUSDUSDT\",\"orderId\":785149107,\"orderListId\":-1,
-//  \"clientOrderId\":\"UpVFUJFkT10UuL6D9thbCc\",\"transactTime\":1669789200380,
-//  \"price\":\"1.00000000\",\"origQty\":\"10.00000000\",\"executedQty\":\"0.00000000\",
-//  \"cummulativeQuoteQty\":\"0.00000000\",\"status\":\"NEW\",\"timeInForce\":\"GTC\",\"type\":\"LIMIT\",\"side\":\"BUY\",\"fills\":[]
-//}"
 
 
 #[derive(Clone, Deserialize, Serialize)]
@@ -68,6 +62,14 @@ impl BinanceDeleteAllOrder {
     }
 
 }
+
+// "[{\"symbol\":\"BUSDUSDT\",\"origClientOrderId\":\"MBsclqrSGO3C8zqUDZJvwO\",
+// \"orderId\":785401796,\"orderListId\":-1,\"clientOrderId\":\"KOO4AHSGsCbuMXRVKJveJ2\",
+// \"price\":\"1.00000000\",\"origQty\":\"10.00000000\",\"executedQty\":\"0.00000000\",
+// \"cummulativeQuoteQty\":\"0.00000000\",\"status\":\"CANCELED\",\"timeInForce\":\"GTC\",
+// \"type\":\"LIMIT\",\"side\":\"BUY\"}]"
+#[derive(Clone, Deserialize, Serialize, Debug)]
+pub struct BinanceDeleteAllOrderResponse(Vec<BinanceDeleteOrderResponse>);
 
 #[derive(Clone, Deserialize, Serialize, Debug)]
 pub struct BinanceDeleteOrderResponse {
