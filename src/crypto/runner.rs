@@ -6,16 +6,14 @@ use url::Url;
 // const TRADE_URL_PU: &str =      "wss://fstream.binance.com/stream?streams=btcusdt@trade";
 const TRADE_URL_SPOT: &str = "https://api.binance.com";
 // const TRADE_URL_SPOT_1: &str =    "https://api1.binance.com";
-
+const API_ORDER_TEST : &str = "/api/v3/order";
 const ACCESS_KEY: &str = "nifNGIXIzco8YXe3PpuD0zMXvJN33WpWdNNxHl1GLb1JIS5n9TttdcIxlZnHQhGA";
 const SECRET_KEY: &str = "atl3kPizvOkgM366O2OPbotuQpbWIxH2M4IEbvAwwqxey6amjKODfb0mBsVNpji1";
 
 pub async fn send_request() {
     let client = reqwest::Client::new();
-    
-    let api_a = "/api/v3/order/test";
 
-    let url_str = format!("{}{}", TRADE_URL_SPOT, api_a,);
+    let url_str = format!("{}{}", TRADE_URL_SPOT, API_ORDER_TEST,);
     let url = Url::parse(&url_str).expect("Bad URL");
     let order = BinanceOrder::new_default();
     let params = order.into_string();
