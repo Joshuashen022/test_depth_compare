@@ -1,9 +1,9 @@
-use std::fmt;
-use serde::{Deserialize, Deserializer};
 use serde::de::{SeqAccess, Visitor};
+use serde::{Deserialize, Deserializer};
+use std::fmt;
 
 #[derive(Deserialize, Debug)]
-pub struct LevelEventStream{
+pub struct LevelEventStream {
     pub id: i64,
     pub method: String,
     pub code: i64,
@@ -11,21 +11,21 @@ pub struct LevelEventStream{
 }
 
 #[derive(Deserialize, Debug)]
-pub struct Event{
+pub struct Event {
     pub depth: i64,
     pub data: Vec<Data>,
-    pub instrument_name: String
+    pub instrument_name: String,
 }
 
 #[derive(Deserialize, Debug)]
-pub struct Data{
+pub struct Data {
     pub bids: Vec<Quotes>,
     pub asks: Vec<Quotes>,
     pub t: i64,
 }
 
 #[derive(Debug, Copy, Clone)]
-pub struct Quotes{
+pub struct Quotes {
     pub price: f64,
     pub amount: f64,
     pub order_numbers: i64,
@@ -33,8 +33,8 @@ pub struct Quotes{
 
 impl<'de> Deserialize<'de> for Quotes {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where
-            D: Deserializer<'de>,
+    where
+        D: Deserializer<'de>,
     {
         deserializer.deserialize_tuple(3, QuotesVisitor)
     }
@@ -50,8 +50,8 @@ impl<'de> Visitor<'de> for QuotesVisitor {
     }
 
     fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
-        where
-            A: SeqAccess<'de>,
+    where
+        A: SeqAccess<'de>,
     {
         let mut price = None;
         let mut amount = None;

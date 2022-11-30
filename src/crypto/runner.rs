@@ -1,15 +1,15 @@
-use tokio_tungstenite::{connect_async, tungstenite};
+use super::decoder::BinanceOrder;
+use futures_util::{SinkExt, StreamExt};
 use hex::encode;
-use sha2::Sha256;
 use hmac::{Hmac, Mac};
 use reqwest;
-use futures_util::{SinkExt, StreamExt};
+use sha2::Sha256;
+use tokio_tungstenite::{connect_async, tungstenite};
 use url::Url;
-use super::decoder::BinanceOrder;
 
 // const TRADE_URL_PC: &str =      "wss://dstream.binance.com/stream?streams=btcusd_221230@trade";
 // const TRADE_URL_PU: &str =      "wss://fstream.binance.com/stream?streams=btcusdt@trade";
-const TRADE_URL_SPOT: &str =    "https://api.binance.com";
+const TRADE_URL_SPOT: &str = "https://api.binance.com";
 // const TRADE_URL_SPOT_1: &str =    "https://api1.binance.com";
 
 const ACCESS_KEY: &str = "nifNGIXIzco8YXe3PpuD0zMXvJN33WpWdNNxHl1GLb1JIS5n9TttdcIxlZnHQhGA";
@@ -17,15 +17,13 @@ const SECRET_KEY: &str = "atl3kPizvOkgM366O2OPbotuQpbWIxH2M4IEbvAwwqxey6amjKODfb
 
 type HmacSha256 = Hmac<Sha256>;
 
-
-pub async fn send_request(){
-    
+pub async fn send_request() {
     let api_a = "/api/v3/order/test?";
     // let api_b = "/v3/order/test?";
-    
+
     let client = reqwest::Client::new();
     let order = BinanceOrder::new_default();
-    
+
     let body = order.into_str();
 
     let mut mac = HmacSha256::new_from_slice(SECRET_KEY.as_bytes()).unwrap();
@@ -33,18 +31,25 @@ pub async fn send_request(){
     let hash_bytes = mac.finalize().into_bytes();
     let hash = encode(hash_bytes);
 
-    let url_str = format!("{}{}&signature={}", TRADE_URL_SPOT, api_a, hash);
+    let url_str = format!("{}{}{}&signature={}", TRADE_URL_SPOT, api_a, body, hash);
+
+    println!("url: {}", url_str);
     let url = Url::parse(&url_str).expect("Bad URL");
-    let res = client.post(url).header("X-MBX-APIKEY", ACCESS_KEY)
-    .body(body)
-    .send().await.unwrap()
-    .text().await.unwrap();
+    let res = client
+        .post(url)
+        .header("X-MBX-APIKEY", ACCESS_KEY)
+        .body(body)
+        .send()
+        .await
+        .unwrap()
+        .text()
+        .await
+        .unwrap();
     // let head = res.headers().iter();
     // for v in head{
     //     println!("head {:?}", v);
     // }
-    
+
     println!("client {:?}", res);
     println!("Done");
 }
-

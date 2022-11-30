@@ -6,61 +6,59 @@ use serde::{Deserialize, Serialize};
 // use serde::Deserializer;
 // use std::collections::BTreeMap;
 // use std::fmt::{self, Debug};
-// use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::{SystemTime, UNIX_EPOCH};
 // use tokio_tungstenite::tungstenite;
 // use tungstenite::protocol::Message;
 
-
 #[derive(Clone, Deserialize, Serialize)]
-pub struct BinanceOrder{
+pub struct BinanceOrder {
     symbol: String,
-    
+
     side: Side,
-    
+
     #[serde(rename = "type")]
     order_type: OrderType,
-    
+
     #[serde(rename = "timeInForce")]
-    time_in_force:Option<TimeInForce>,
-    
+    time_in_force: Option<TimeInForce>,
+
     quantity: Option<i64>,
-    
+
     #[serde(rename = "quoteOrderQty")]
     quote_order_qty: Option<i64>,
-    
+
     price: Option<i64>,
-    
+
     #[serde(rename = "newClientOrderId")]
     new_client_order_id: Option<String>,
-    
+
     #[serde(rename = "stopPrice")]
     stop_price: Option<i64>,
-    
+
     #[serde(rename = "trailingDelta")]
     trailing_delta: Option<i64>,
-    
+
     #[serde(rename = "icebergQty")]
     iceberg_qty: Option<i64>,
-    
+
     #[serde(rename = "newOrderRespType")]
     new_order_resp_type: Option<NewOrderRespType>,
-    
+
     #[serde(rename = "strategyId")]
     strategy_id: Option<i64>,
-    
+
     #[serde(rename = "strategyType")]
     strategy_type: Option<i64>,
-    
+
     #[serde(rename = "recvWindow")]
     recv_window: Option<i64>,
-    
+
     timestamp: i64,
 }
 
-impl BinanceOrder{
-
-    pub fn new_default() -> Self{
-        BinanceOrder{
+impl BinanceOrder {
+    pub fn new_default() -> Self {
+        BinanceOrder {
             symbol: String::from("BUSDUSDT"),
             side: Side::Buy,
             order_type: OrderType::LimitMaker,
@@ -81,14 +79,26 @@ impl BinanceOrder{
     }
     //"symbol=BUSDUSDT&side=BUY&type=LIMIT&timeInForce=GTC&quantity=1&price=0.1&recvWindow=5000&timestamp=1499827319559"
 
-    pub fn into_str(self) -> String{
-        String::from("symbol=BUSDUSDT&side=BUY&type=LIMIT&timeInForce=GTC&quantity=1&price=0.1&recvWindow=5000&timestamp=1499827319559")
+    pub fn into_str(self) -> String {
+
+        let symbol = "BUSDUSDT";
+        let side = "BUY";
+        let order_type = "LIMIT";
+        let recv_window = 5000;
+        let quantityt = 1;
+        let time_in_force = "GTC";
+        let price = 0.1;
+        let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
+
+        format!(
+            "symbol={}&side={}&type={}&timeInForce={}&quantity={}&price={}&recvWindow={}&timestamp={}", 
+            symbol, side, order_type, time_in_force, quantityt, price, recv_window, now.as_millis() as i64
+        )
     }
 }
 
-
 #[derive(Clone, Deserialize, Serialize)]
-pub enum Side{
+pub enum Side {
     #[serde(rename = "BUY")]
     Buy,
     #[serde(rename = "SELL")]
@@ -96,7 +106,7 @@ pub enum Side{
 }
 
 #[derive(Clone, Deserialize, Serialize)]
-pub enum OrderType{
+pub enum OrderType {
     #[serde(rename = "LIMIT")]
     Limit,
     #[serde(rename = "MARKET")]
@@ -114,7 +124,7 @@ pub enum OrderType{
 }
 
 #[derive(Clone, Deserialize, Serialize)]
-pub enum TimeInForce{
+pub enum TimeInForce {
     /// Stop until success
     GTC,
     /// Stop if can't success inmediately
@@ -125,32 +135,29 @@ pub enum TimeInForce{
 }
 
 #[derive(Clone, Deserialize, Serialize)]
-pub enum NewOrderRespType{
+pub enum NewOrderRespType {
     ACK,
     RESULT,
     FULL,
 }
 
-
-
 #[cfg(test)]
-mod test{
+mod test {
     use super::*;
-    use sha2::Sha256;
-    use hmac::{Hmac, Mac};
     use hex::encode;
+    use hmac::{Hmac, Mac};
+    use sha2::Sha256;
 
     #[test]
-    fn test_none_serde(){
-        
+    fn test_none_serde() {
         let binance_order = BinanceOrder::new_default();
 
         let serde_str = serde_json::to_string(&binance_order).unwrap();
-        println!("{}", serde_str) ;
+        println!("{}", serde_str);
     }
 
     #[test]
-    fn sha256_test(){
+    fn sha256_test() {
         type HmacSha256 = Hmac<Sha256>;
         let input = b"NhqPtmdSJYdKjVHjA7PZj4Mge3R5YNiP1e3UZjInClVN65XAbvqqM6A7H5fATj0j";
         let info2 = b"symbol=LTCBTC&side=BUY&type=LIMIT&timeInForce=GTC&quantity=1&price=0.1&recvWindow=5000&timestamp=1499827319559";
@@ -159,12 +166,10 @@ mod test{
         mac.update(info2);
         let result = mac.finalize().into_bytes();
         let result = encode(result);
-        
+
         assert_eq!(
-            result, 
+            result,
             String::from("c8db56825ae71d6d79447849e617115f4a920fa2acdcab2b053c4b2838bd6b71")
         );
-
     }
-
 }
