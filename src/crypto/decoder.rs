@@ -104,7 +104,7 @@ impl BinanceOrder {
 
     pub fn into_string(self) -> String {
 
-        let symbol = "LTCBTC";
+        let symbol = "BUSDUSDT";
         let side = "BUY";
         let order_type = "LIMIT";
         let recv_window = 5000;

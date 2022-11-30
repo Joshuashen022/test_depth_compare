@@ -41,7 +41,7 @@ pub async fn send_request() {
     let res = client
         .post(url)
         .header("X-MBX-APIKEY", ACCESS_KEY)
-        .body(body)
+        // .body(body)
         .send()
         .await
         .unwrap()
