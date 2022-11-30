@@ -41,8 +41,8 @@ impl BinanceCheckOrder {
     pub fn into_string(&self) -> String {
 
         let symbol = "BUSDUSDT";
-        let order_id = 0;
-        let orgin_client_order_id = "";
+        let order_id = 785460948;
+        let orgin_client_order_id = "xiyCOYg0CddVT0nedEAg35";
         let receive_window = 5000;
         let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
 
