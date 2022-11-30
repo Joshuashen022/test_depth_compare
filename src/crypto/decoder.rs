@@ -108,7 +108,7 @@ impl BinanceOrder {
         let side = "BUY";
         let order_type = "LIMIT";
         let recv_window = 5000;
-        let quantityt = 1;
+        let quantityt = 10;
         let time_in_force = "GTC";
         let price = 1.0;
         let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
