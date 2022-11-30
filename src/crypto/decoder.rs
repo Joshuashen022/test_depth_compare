@@ -11,7 +11,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 // use tungstenite::protocol::Message;
 use hex::encode;
 use hmac::{Hmac, Mac};
-use reqwest;
+// use reqwest;
 use sha2::Sha256;
 type HmacSha256 = Hmac<Sha256>;
 
@@ -110,7 +110,7 @@ impl BinanceOrder {
         let recv_window = 5000;
         let quantityt = 1;
         let time_in_force = "GTC";
-        let price = 0.1;
+        let price = 1.0;
         let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
 
         format!(

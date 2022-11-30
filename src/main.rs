@@ -5,7 +5,7 @@ mod deep;
 use crypto::runner::send_request;
 use deep::{get_infustructure, BinanceSpotOrderBookSnapshot, DepthRow, Event, LevelEvent};
 use futures_util::StreamExt;
-use serde::de::Error;
+// use serde::de::Error;
 use std::{borrow::Cow, ops::Deref, time::Instant};
 use tokio_tungstenite::connect_async;
 use url::Url;

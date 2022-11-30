@@ -14,7 +14,6 @@ pub async fn send_request() {
     let client = reqwest::Client::new();
     
     let api_a = "/api/v3/order/test";
-    // let api_b = "/v3/order/test?";
 
     let url_str = format!("{}{}", TRADE_URL_SPOT, api_a,);
     let url = Url::parse(&url_str).expect("Bad URL");
@@ -45,10 +44,6 @@ pub async fn send_request() {
         .text()
         .await
         .unwrap();
-    // let head = res.headers().iter();
-    // for v in head{
-    //     println!("head {:?}", v);
-    // }
 
     println!("client {:?}", res);
     println!("Done");
