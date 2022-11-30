@@ -21,7 +21,7 @@ pub async fn send_request() {
     println!("url: {}", url_str);
     println!("body: {}", body);
 
-    let res = place_order(url_str, body).await;
+    let res = delete_order(url_str, body).await;
 
     println!("client {:?}", res);
 
@@ -29,21 +29,6 @@ pub async fn send_request() {
     println!("after {:?}", after);
     println!("Done");
 
-}
-
-async fn place_order(url: String, body: String) -> String {
-    let url = Url::parse(&url).expect("Bad URL");
-    let client = reqwest::Client::new();
-    client
-        .post(url)
-        .header("X-MBX-APIKEY", ACCESS_KEY)
-        .body(body)
-        .send()
-        .await
-        .unwrap()
-        .text()
-        .await
-        .unwrap()
 }
 
 async fn delete_order(url: String, body: String) -> String {
