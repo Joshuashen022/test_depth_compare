@@ -32,7 +32,7 @@ pub async fn send_request() {
 async fn check_order(url: String, body: String) -> String {
     let quarry_string = format!("{}?{}", url, body);
     println!("quarry_string: {}", quarry_string);
-    let url = Url::parse(&url).expect("Bad URL");
+    let url = Url::parse(&quarry_string).expect("Bad URL");
     let client = reqwest::Client::new();
     client
         .get(url)
