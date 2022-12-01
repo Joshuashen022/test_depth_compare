@@ -19,20 +19,24 @@ type HmacSha256 = Hmac<Sha256>;
 
 
 #[derive(Clone, Deserialize, Serialize)]
-pub struct BinanceCheckOrder{
+pub struct BinanceCheckAllOrder{
     symbol: String,
     order_id: i64,
-    orgin_client_order_id: String,
+    start_time: i64,
+    end_time: i64,
+    limit: String,
     receive_window: i64,
     timestamp: i64,
 }
 
-impl BinanceCheckOrder {
+impl BinanceCheckAllOrder {
     pub fn new() -> Self {
-        BinanceCheckOrder{
+        BinanceCheckAllOrder{
             symbol: String::new(),
             order_id: 0,
-            orgin_client_order_id: String::new(),
+            start_time: 0,
+            end_time: 0,
+            limit: String::new(),
             receive_window: 0,
             timestamp: 0,
         }
@@ -41,14 +45,14 @@ impl BinanceCheckOrder {
     pub fn into_string(&self) -> String {
 
         let symbol = "BUSDUSDT";
-        let order_id = 785460948;
-        let orgin_client_order_id = "xiyCOYg0CddVT0nedEAg35";
+        // let order_id = 785460948;
+        // let orgin_client_order_id = "xiyCOYg0CddVT0nedEAg35";
         let receive_window = 5000;
         let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
 
         format!(
-            "symbol={}&orderId={}&origClientOrderId={}&recvWindow={}&timestamp={}", 
-            symbol, order_id, orgin_client_order_id, receive_window, now.as_millis() as i64
+            "symbol={}&recvWindow={}&timestamp={}", 
+            symbol, receive_window, now.as_millis() as i64
         )
     }
 
@@ -73,6 +77,9 @@ impl BinanceCheckOrder {
 // \"price\":\"1.00000000\",\"origQty\":\"10.00000000\",\"executedQty\":\"0.00000000\",
 // \"cummulativeQuoteQty\":\"0.00000000\",\"status\":\"CANCELED\",\"timeInForce\":\"GTC\",
 // \"type\":\"LIMIT\",\"side\":\"BUY\"}]"
+
+#[derive(Clone, Deserialize, Serialize, Debug)]
+pub struct BinanceCheckAllOrderResponse(Vec<BinanceCheckOrderResponse>);
 
 #[derive(Clone, Deserialize, Serialize, Debug)]
 pub struct BinanceCheckOrderResponse {
