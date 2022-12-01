@@ -24,7 +24,7 @@ pub async fn send_request() {
     let res = prolong_key(url_str, body).await;
 
     println!("client {:?}", res);
-    assert_eq!("res", "{}");
+    assert_eq!(res, "{}");
     // let after: EmptyRespond = serde_json::from_str(&res).unwrap();
     // println!("after {:?}", after);
     println!("Done");
