@@ -1,4 +1,4 @@
-use super::decoder::{ListenKey, get_body};
+use super::decoder::{ListenKey, EmptyRespond};
 use reqwest;
 use url::Url;
 
@@ -16,6 +16,7 @@ pub const SECRET_KEY: &str = "atl3kPizvOkgM366O2OPbotuQpbWIxH2M4IEbvAwwqxey6amjK
 
 
 // 3lUeRcWmZF8qBgDVXZ7v2LZKGjsKmowAH2PZjhwww5LbdQKZ71PHVyC77a6b
+
 pub async fn send_request() {
     let listen_key = "3lUeRcWmZF8qBgDVXZ7v2LZKGjsKmowAH2PZjhwww5LbdQKZ71PHVyC77a6b";
     let url_str = format!("{}{}", TRADE_URL_SPOT, API_USER_DATA_STREAM);
@@ -23,9 +24,9 @@ pub async fn send_request() {
     let res = prolong_key(url_str, body).await;
 
     println!("client {:?}", res);
-
-    let after: ListenKey = serde_json::from_str(&res).unwrap();
-    println!("after {:?}", after);
+    assert_eq!("res", "{}");
+    // let after: EmptyRespond = serde_json::from_str(&res).unwrap();
+    // println!("after {:?}", after);
     println!("Done");
 
 }
