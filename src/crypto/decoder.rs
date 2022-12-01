@@ -14,8 +14,11 @@ use hmac::{Hmac, Mac};
 // use reqwest;
 use sha2::Sha256;
 type HmacSha256 = Hmac<Sha256>;
-
-
+#[derive(Clone, Deserialize, Serialize, Debug)]
+pub struct ListenKey{
+    #[serde(rename = "listenKey")]
+    listen_key: String
+}
 
 
 #[derive(Clone, Deserialize, Serialize)]
@@ -42,6 +45,10 @@ impl BinanceCheckAllOrder {
         }
     }
 
+    // ./target/release/ac-rust --ca -s "BUSDUSDT"
+    // ./target/release/ac-rust --co -s "BUSDUSDT" --oid 786706435 --cid "s6iHMeEj6Se2NSXImlBFbA"
+    // ./target/release/ac-rust --da -s "BUSDUSDT"
+    // order_id: 786706435, order_list_id: -1, client_order_id: "s6iHMeEj6Se2NSXImlBFbA"
     pub fn into_string(&self) -> String {
 
         let symbol = "BUSDUSDT";
