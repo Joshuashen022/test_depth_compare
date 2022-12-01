@@ -21,7 +21,7 @@ pub async fn send_request() {
     let listen_key = "3lUeRcWmZF8qBgDVXZ7v2LZKGjsKmowAH2PZjhwww5LbdQKZ71PHVyC77a6b";
     let url_str = format!("{}{}", TRADE_URL_SPOT, API_USER_DATA_STREAM);
     let body = format!("listenKey={}", listen_key);
-    let res = prolong_key(url_str, body).await;
+    let res = delete_key(url_str, body).await;
 
     println!("client {:?}", res);
     assert_eq!(res, "{}");
@@ -32,13 +32,13 @@ pub async fn send_request() {
 }
 
 // url: https://api.binance.com/api/v3/order
-async fn prolong_key(url: String, body: String) -> String {
+async fn delete_key(url: String, body: String) -> String {
     println!("url {:?}", url);
     let url = Url::parse(&url).expect("Bad URL");
     
     let client = reqwest::Client::new();
     client
-        .put(url)
+        .delete(url)
         .header("X-MBX-APIKEY", ACCESS_KEY)
         .body(body)
         .send()
