@@ -8,13 +8,14 @@ const TRADE_URL_SPOT: &str = "https://api.binance.com";
 // const TRADE_URL_SPOT_1: &str =    "https://api1.binance.com";
 // const API_ORDER_TEST : &str = "/api/v3/order/test";
 // const API_ORDER : &str = "/api/v3/order";
-const API_OPEN_ORDERS : &str = "/api/v3/openOrders";
+// const API_OPEN_ORDERS : &str = "/api/v3/openOrders";
+const API_ALL_ORDERS : &str = "/api/v3/allOrders";
 pub const ACCESS_KEY: &str = "nifNGIXIzco8YXe3PpuD0zMXvJN33WpWdNNxHl1GLb1JIS5n9TttdcIxlZnHQhGA";
 pub const SECRET_KEY: &str = "atl3kPizvOkgM366O2OPbotuQpbWIxH2M4IEbvAwwqxey6amjKODfb0mBsVNpji1";
 
 pub async fn send_request() {
 
-    let url_str = format!("{}{}", TRADE_URL_SPOT, API_OPEN_ORDERS);
+    let url_str = format!("{}{}", TRADE_URL_SPOT, API_ALL_ORDERS);
     
     let order = BinanceCheckAllOrder::new();
     let body = order.get_body();
