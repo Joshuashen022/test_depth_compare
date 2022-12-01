@@ -19,7 +19,7 @@ pub const SECRET_KEY: &str = "atl3kPizvOkgM366O2OPbotuQpbWIxH2M4IEbvAwwqxey6amjK
 pub async fn send_request() {
     let listen_key = "3lUeRcWmZF8qBgDVXZ7v2LZKGjsKmowAH2PZjhwww5LbdQKZ71PHVyC77a6b";
     let url_str = format!("{}{}", TRADE_URL_SPOT, API_USER_DATA_STREAM);
-    let body = get_body(listen_key);
+    let body = format!("listenKey={}", listen_key);
     let res = prolong_key(url_str, body).await;
 
     println!("client {:?}", res);
