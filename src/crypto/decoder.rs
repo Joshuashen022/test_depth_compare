@@ -120,7 +120,7 @@ pub struct BinanceCheckOrderResponse {
     update_time: i64,
 
     #[serde(rename = "isWorking")]
-    is_working: i64,
+    is_working: bool,
 
     #[serde(rename = "origQuoteOrderQty")]
     origin_quote_order_qty: String,
