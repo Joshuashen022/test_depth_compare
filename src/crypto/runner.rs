@@ -40,7 +40,7 @@ async fn get_listen_key(url: String) -> String {
     
     let client = reqwest::Client::new();
     client
-        .put(url)
+        .post(url)
         .header("X-MBX-APIKEY", ACCESS_KEY)
         .send()
         .await
