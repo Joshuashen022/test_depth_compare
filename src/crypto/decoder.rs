@@ -20,6 +20,20 @@ pub struct ListenKey{
     listen_key: String
 }
 
+pub fn get_body(listen_key: &str) -> String {
+    let params = format!("listenKey={}", listen_key);
+    
+    let hasher = Hasher{
+        api_key: ACCESS_KEY.to_string(),
+        secret_key: SECRET_KEY.to_string(),
+        raw_message: params.clone(),
+    };
+
+    let hash = hasher.hash();
+
+    format!("{}&signature={}", params, hash)
+    
+}
 
 #[derive(Clone, Deserialize, Serialize)]
 pub struct BinanceCheckAllOrder{

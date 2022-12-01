@@ -1,4 +1,4 @@
-use super::decoder::{ListenKey, BinanceCheckAllOrderResponse};
+use super::decoder::{ListenKey, get_body};
 use reqwest;
 use url::Url;
 
@@ -15,15 +15,12 @@ pub const ACCESS_KEY: &str = "nifNGIXIzco8YXe3PpuD0zMXvJN33WpWdNNxHl1GLb1JIS5n9T
 pub const SECRET_KEY: &str = "atl3kPizvOkgM366O2OPbotuQpbWIxH2M4IEbvAwwqxey6amjKODfb0mBsVNpji1";
 
 
-
+// 3lUeRcWmZF8qBgDVXZ7v2LZKGjsKmowAH2PZjhwww5LbdQKZ71PHVyC77a6b
 pub async fn send_request() {
-
+    let listen_key = "3lUeRcWmZF8qBgDVXZ7v2LZKGjsKmowAH2PZjhwww5LbdQKZ71PHVyC77a6b";
     let url_str = format!("{}{}", TRADE_URL_SPOT, API_USER_DATA_STREAM);
-    
-    // let order = BinanceCheckAllOrder::new();
-    // let body = order.get_body();
-
-    let res = get_listen_key(url_str).await;
+    let body = get_body(listen_key);
+    let res = prolong_key(url_str, body).await;
 
     println!("client {:?}", res);
 
@@ -34,14 +31,15 @@ pub async fn send_request() {
 }
 
 // url: https://api.binance.com/api/v3/order
-async fn get_listen_key(url: String) -> String {
+async fn prolong_key(url: String, body: String) -> String {
     println!("url {:?}", url);
     let url = Url::parse(&url).expect("Bad URL");
     
     let client = reqwest::Client::new();
     client
-        .post(url)
+        .put(url)
         .header("X-MBX-APIKEY", ACCESS_KEY)
+        .body(body)
         .send()
         .await
         .unwrap()
