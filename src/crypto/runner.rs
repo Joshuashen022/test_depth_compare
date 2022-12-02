@@ -1,9 +1,10 @@
-use super::decoder::{ListenKey, BinanceOrderUpdatePayload};
+use super::decoder::{ListenKey, BinanceOrderUpdatePayload, OutboundAccountPositionPayload, PayloadType};
 use reqwest;
 use url::Url;
 use tokio_tungstenite::connect_async;
-use futures_util::SinkExt;
+use tokio_tungstenite::tungstenite::Message;
 use futures_util::StreamExt;
+use futures_util::SinkExt;
 // const TRADE_URL_PC: &str =      "wss://dstream.binance.com/stream?streams=btcusd_221230@trade";
 // const TRADE_URL_PU: &str =      "wss://fstream.binance.com/stream?streams=btcusdt@trade";
 const TRADE_URL_SPOT: &str = "https://api.binance.com";
@@ -33,10 +34,49 @@ pub async fn send_request() {
     }.unwrap();
 
     println!("connection success");
-    
+
     while let Ok(message) = stream.next().await.unwrap() {
         
-        println!("client {:?}", message);
+        match &message{
+            Message::Ping(inner) => {
+                println!("Receive ping {:?}", inner);
+                stream.send(Message::Pong(inner.clone())).await.unwrap();
+            },
+            Message::Text(inner) => {
+                let event: PayloadType = match serde_json::from_str(inner){
+                    Ok(e) => e,
+                    Err(e) => {
+                        println!("{:?}",e);
+                        continue;
+                    }
+                };
+                match event.event_type.as_str(){
+                    "outboundAccountPosition" => {
+                        let event: OutboundAccountPositionPayload = match serde_json::from_str(inner){
+                            Ok(e) => e,
+                            Err(e) => {
+                                println!("{:?}",e);
+                                continue;
+                            }
+                        };
+                        println!("{:?}", event)
+                    },
+                    "executionReport" => {
+                        let event: BinanceOrderUpdatePayload = match serde_json::from_str(inner){
+                            Ok(e) => e,
+                            Err(e) => {
+                                println!("{:?}",e);
+                                continue;
+                            }
+                        };
+                        println!("{:?}", event)
+                    },
+                    _ => println!("unknown event type: {:?}", inner),
+                }
+            },
+            _ => println!("unknown message type: {:?}", message),
+        }
+        
         
     }
     

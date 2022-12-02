@@ -19,9 +19,13 @@ pub struct ListenKey{
     #[serde(rename = "listenKey")]
     listen_key: String
 }
+#[derive(Clone, Deserialize, Serialize, Debug)]
+pub struct PayloadType{
+    #[serde(rename = "e")]
+    pub event_type: String,
+}
 
-
-#[derive(Clone, Deserialize, Serialize)]
+#[derive(Clone, Deserialize, Serialize, Debug)]
 pub struct BinanceOrderUpdatePayload{
     #[serde(rename = "e")]//
     event_type: String,
@@ -145,64 +149,6 @@ pub struct  TradeInfo{
     client_order_id: String,
 }
 
-#[derive(Clone, Deserialize, Serialize)]
-pub struct BinanceCheckAllOrder{
-    symbol: String,
-    order_id: i64,
-    start_time: i64,
-    end_time: i64,
-    limit: String,
-    receive_window: i64,
-    timestamp: i64,
-}
-
-impl BinanceCheckAllOrder {
-    pub fn new() -> Self {
-        BinanceCheckAllOrder{
-            symbol: String::new(),
-            order_id: 0,
-            start_time: 0,
-            end_time: 0,
-            limit: String::new(),
-            receive_window: 0,
-            timestamp: 0,
-        }
-    }
-
-    // ./target/release/ac-rust --ca -s "BUSDUSDT"
-    // ./target/release/ac-rust --co -s "BUSDUSDT" --oid 786706435 --cid "s6iHMeEj6Se2NSXImlBFbA"
-    // ./target/release/ac-rust --da -s "BUSDUSDT"
-    // order_id: 786706435, order_list_id: -1, client_order_id: "s6iHMeEj6Se2NSXImlBFbA"
-    pub fn into_string(&self) -> String {
-
-        let symbol = "BUSDUSDT";
-        // let order_id = 785460948;
-        // let orgin_client_order_id = "xiyCOYg0CddVT0nedEAg35";
-        let receive_window = 5000;
-        let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
-
-        format!(
-            "symbol={}&recvWindow={}&timestamp={}", 
-            symbol, receive_window, now.as_millis() as i64
-        )
-    }
-
-    pub fn get_body(&self) -> String {
-        let params = self.into_string();
-    
-        let hasher = Hasher{
-            api_key: ACCESS_KEY.to_string(),
-            secret_key: SECRET_KEY.to_string(),
-            raw_message: params.clone(),
-        };
-    
-        let hash = hasher.hash();
-    
-        format!("{}&signature={}", params, hash)
-    }
-
-}
-
 // client Text("{\"e\":\"executionReport\",\"E\":1669966676261,\"s\":\"BUSDUSDT\",\"c\":\"Ze8RSBoOCq8sTZOfAL65fJ\",
 // \"S\":\"BUY\",\"o\":\"LIMIT\",\"f\":\"GTC\",\"q\":\"10.00000000\",\"p\":\"1.00000000\",\"P\":\"0.00000000\",
 // \"F\":\"0.00000000\",\"g\":-1,\"C\":\"\",\"x\":\"NEW\",\"X\":\"NEW\",\"r\":\"NONE\",\"i\":788547877,\"l\":\"0.00000000\",
@@ -215,63 +161,27 @@ impl BinanceCheckAllOrder {
 // \"z\":\"10.00000000\",\"L\":\"1.00000000\",\"n\":\"0.00000000\",\"N\":\"BNB\",\"T\":1669966676260,\"t\":368830006,
 // \"I\":1945884978,\"w\":false,\"m\":false,\"M\":true,\"O\":1669966676260,\"Z\":\"10.00000000\",\"Y\":\"10.00000000\",\"Q\":\"0.00000000\"}")
 
-
 #[derive(Clone, Deserialize, Serialize, Debug)]
-pub struct BinanceCheckAllOrderResponse(Vec<BinanceCheckOrderResponse>);
-
-#[derive(Clone, Deserialize, Serialize, Debug)]
-pub struct BinanceCheckOrderResponse {
-    symbol: String,
-
-    #[serde(rename = "orderId")]
-    order_id: i64,
-
-    #[serde(rename = "orderListId")]
-    order_list_id: i64,
-
-    #[serde(rename = "clientOrderId")]
-    client_order_id: String,
-
-    price: String,
-
-    #[serde(rename = "origQty")]
-    origin_qty: String,
-
-    #[serde(rename = "executedQty")]
-    executed_qty: String,
-
-    #[serde(rename = "cummulativeQuoteQty")]
-    cummulative_quote_qty: String,
-
-    status: String,
-
-    #[serde(rename = "timeInForce")]
-    time_in_force: String,
-
-    #[serde(rename = "type")]
-    order_type: String,
-
-    side: String,
-
-    #[serde(rename = "stopPrice")]
-    stop_price:String,
-    
-    #[serde(rename = "icebergQty")]
-    iceberg_qty:String,
-
-    time: i64,
-
-    #[serde(rename = "updateTime")]
-    update_time: i64,
-
-    #[serde(rename = "isWorking")]
-    is_working: bool,
-
-    #[serde(rename = "origQuoteOrderQty")]
-    origin_quote_order_qty: String,
-
+pub struct OutboundAccountPositionPayload{
+    #[serde(rename = "e")]
+    event_type: String,
+    #[serde(rename = "E")]
+    event_time: i64,
+    #[serde(rename = "u")]
+    account_last_update_time: i64,
+    #[serde(rename = "B")]
+    balance: Vec<Balance>
 }
 
+#[derive(Clone, Deserialize, Serialize, Debug)]
+pub struct Balance{
+    #[serde(rename = "a")]
+    name: String,
+    #[serde(rename = "f")]
+    usable_amount: String,
+    #[serde(rename = "l")]
+    frozen_amount: String,
+}
 pub struct Hasher{
     pub secret_key: String,
     pub api_key: String,
