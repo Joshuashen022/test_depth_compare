@@ -19,8 +19,130 @@ pub struct ListenKey{
     #[serde(rename = "listenKey")]
     listen_key: String
 }
+
 #[derive(Clone, Deserialize, Serialize)]
-pub struct EmptyRespond;
+pub struct BinanceOrderUpdatePayload{
+    #[serde(rename = "e")]
+    event_type: String,
+    #[serde(rename = "E")]
+    event_time: i64,
+    #[serde(rename = "s")]
+    symbol: String,
+    #[serde(rename = "c")]
+    client_order_id: String,
+    #[serde(rename = "S")]
+    side: String,
+    #[serde(rename = "o")]
+    order_type: String,
+    #[serde(rename = "f")]
+    time_in_force: String,
+    #[serde(rename = "q")]
+    order_quantity: String,
+    #[serde(rename = "p")]
+    order_price: String,
+    #[serde(rename = "P")]
+    stop_price: String,
+    ///partial visable
+    #[serde(rename = "d")]
+    trailing_delta: i64,
+    #[serde(rename = "F")]
+    iceberg_quantity: String,
+    #[serde(rename = "g")]
+    order_list_id: i64,
+    #[serde(rename = "C")]
+    origin_client_order_id: String,
+    #[serde(rename = "x")]
+    current_execution_type: String,
+    #[serde(rename = "X")]
+    current_order_status: String,
+    #[serde(rename = "r")]
+    order_reject_reason: String,
+    #[serde(rename = "i")]
+    order_id: i64,
+    #[serde(rename = "l")]
+    last_executed_quantity: String,
+    #[serde(rename = "z")]
+    cumulative_filled_quantity: String,
+    #[serde(rename = "L")]
+    last_executed_price: String,
+    #[serde(rename = "n")]
+    commission_amount: String,
+    #[serde(rename = "N")]
+    comession_asset: Option<String>,
+    #[serde(rename = "T")]
+    transaction_time: i64,
+    #[serde(rename = "t")]
+    trade_id: i64,
+    #[serde(rename = "I")]
+    ignore_1: i64,
+    #[serde(rename = "w")]
+    is_on_book: bool,
+    #[serde(rename = "m")]
+    is_trade_maker: bool,
+    #[serde(rename = "M")]
+    ignore_2: i64,
+    #[serde(rename = "O")]
+    order_creation_time: i64,
+    #[serde(rename = "Z")]
+    cumulative_transacted_quantity: String,
+    #[serde(rename = "Y")]
+    last_transacted_quantity: String,
+    #[serde(rename = "Q")]
+    quote_order_qty: String,
+    #[serde(rename = "j")]
+    strategy_id: i64,
+    #[serde(rename = "J")]
+    strategy_type: i64,
+
+}
+
+#[derive(Clone, Deserialize, Serialize)]
+pub struct OrderInfo{
+    // orderInfo.OrderPrice
+    order_price: String,
+    // orderInfo.Quantity 
+    order_quantity: String,
+    // orderInfo.OrderId 
+    order_id: i64,
+    // orderInfo.ClientOrderId
+    client_order_id: String,
+    // orderInfo.CreateTime 
+    order_creation_time: i64,
+    // orderInfo.UpdateTime
+    event_time: i64,
+    // orderInfo.CumuTradeQty
+    cumulative_filled_quantity: String,
+    // orderInfo.CumuTradeValue 
+    cumulative_transacted_quantity: String,
+    // orderInfo.FeeCurrency = msgMap["N"].String()
+    comession_asset: String,
+    // orderInfo.Status = 2
+    status: i64,
+    // if repOrderMsg.GetOrderStream().CumuTradeQty != 0 {
+    //     orderInfo.AvgPrice = orderInfo.CumuTradeValue / orderInfo.CumuTradeQty
+    // }
+    average_price:i64
+}
+
+#[derive(Clone, Deserialize, Serialize)]
+pub struct  TradeInfo{
+    // tradeInfo.Fee 
+    commission_amount: String,
+    // tradeInfo.FeeCurrency
+    comession_asset: Option<String>,
+    // tradeInfo.TradeId
+    trade_id: i64,
+    // tradeInfo.TradeTime
+    transaction_time: i64,
+    // tradeInfo.TradeQty 
+    last_executed_quantity: String,
+    // tradeInfo.TradePrice
+    last_executed_price: String,
+    // tradeInfo.OrderId 
+    order_id: i64,
+    // tradeInfo.ClientOrderId
+    client_order_id: String,
+}
 
 #[derive(Clone, Deserialize, Serialize)]
 pub struct BinanceCheckAllOrder{
