@@ -20,79 +20,80 @@ pub struct ListenKey{
     listen_key: String
 }
 
+
 #[derive(Clone, Deserialize, Serialize)]
 pub struct BinanceOrderUpdatePayload{
-    #[serde(rename = "e")]
+    #[serde(rename = "e")]//
     event_type: String,
-    #[serde(rename = "E")]
+    #[serde(rename = "E")]//
     event_time: i64,
-    #[serde(rename = "s")]
+    #[serde(rename = "s")]//
     symbol: String,
-    #[serde(rename = "c")]
+    #[serde(rename = "c")]//
     client_order_id: String,
-    #[serde(rename = "S")]
+    #[serde(rename = "S")]//
     side: String,
-    #[serde(rename = "o")]
+    #[serde(rename = "o")]//
     order_type: String,
-    #[serde(rename = "f")]
+    #[serde(rename = "f")]//
     time_in_force: String,
-    #[serde(rename = "q")]
+    #[serde(rename = "q")]//
     order_quantity: String,
-    #[serde(rename = "p")]
+    #[serde(rename = "p")]//
     order_price: String,
-    #[serde(rename = "P")]
+    #[serde(rename = "P")]//
     stop_price: String,
     ///partial visable
     #[serde(rename = "d")]
-    trailing_delta: i64,
-    #[serde(rename = "F")]
+    trailing_delta: Option<i64>,
+    #[serde(rename = "F")]//
     iceberg_quantity: String,
-    #[serde(rename = "g")]
+    #[serde(rename = "g")]//
     order_list_id: i64,
     #[serde(rename = "C")]
-    origin_client_order_id: String,
-    #[serde(rename = "x")]
+    origin_client_order_id: Option<String>,
+    #[serde(rename = "x")]//
     current_execution_type: String,
-    #[serde(rename = "X")]
+    #[serde(rename = "X")]//
     current_order_status: String,
-    #[serde(rename = "r")]
+    #[serde(rename = "r")]//
     order_reject_reason: String,
-    #[serde(rename = "i")]
+    #[serde(rename = "i")]//
     order_id: i64,
-    #[serde(rename = "l")]
+    #[serde(rename = "l")]//
     last_executed_quantity: String,
-    #[serde(rename = "z")]
+    #[serde(rename = "z")]//
     cumulative_filled_quantity: String,
-    #[serde(rename = "L")]
+    #[serde(rename = "L")]//
     last_executed_price: String,
-    #[serde(rename = "n")]
+    #[serde(rename = "n")]//
     commission_amount: String,
-    #[serde(rename = "N")]
+    #[serde(rename = "N")]//
     comession_asset: Option<String>,
-    #[serde(rename = "T")]
+    #[serde(rename = "T")]//
     transaction_time: i64,
-    #[serde(rename = "t")]
+    #[serde(rename = "t")]//
     trade_id: i64,
-    #[serde(rename = "I")]
+    #[serde(rename = "I")]//
     ignore_1: i64,
-    #[serde(rename = "w")]
+    #[serde(rename = "w")]//
     is_on_book: bool,
-    #[serde(rename = "m")]
+    #[serde(rename = "m")]//
     is_trade_maker: bool,
-    #[serde(rename = "M")]
+    #[serde(rename = "M")]//
     ignore_2: i64,
-    #[serde(rename = "O")]
+    #[serde(rename = "O")]//
     order_creation_time: i64,
-    #[serde(rename = "Z")]
+    #[serde(rename = "Z")]//
     cumulative_transacted_quantity: String,
-    #[serde(rename = "Y")]
+    #[serde(rename = "Y")]//
     last_transacted_quantity: String,
-    #[serde(rename = "Q")]
+    #[serde(rename = "Q")]//
     quote_order_qty: String,
     #[serde(rename = "j")]
-    strategy_id: i64,
+    strategy_id: Option<i64>,
     #[serde(rename = "J")]
-    strategy_type: i64,
+    strategy_type: Option<i64>,
 
 }
 
@@ -202,11 +203,18 @@ impl BinanceCheckAllOrder {
 
 }
 
-// "[{\"symbol\":\"BUSDUSDT\",\"origClientOrderId\":\"MBsclqrSGO3C8zqUDZJvwO\",
-// \"orderId\":785401796,\"orderListId\":-1,\"clientOrderId\":\"KOO4AHSGsCbuMXRVKJveJ2\",
-// \"price\":\"1.00000000\",\"origQty\":\"10.00000000\",\"executedQty\":\"0.00000000\",
-// \"cummulativeQuoteQty\":\"0.00000000\",\"status\":\"CANCELED\",\"timeInForce\":\"GTC\",
-// \"type\":\"LIMIT\",\"side\":\"BUY\"}]"
+// client Text("{\"e\":\"executionReport\",\"E\":1669966676261,\"s\":\"BUSDUSDT\",\"c\":\"Ze8RSBoOCq8sTZOfAL65fJ\",
+// \"S\":\"BUY\",\"o\":\"LIMIT\",\"f\":\"GTC\",\"q\":\"10.00000000\",\"p\":\"1.00000000\",\"P\":\"0.00000000\",
+// \"F\":\"0.00000000\",\"g\":-1,\"C\":\"\",\"x\":\"NEW\",\"X\":\"NEW\",\"r\":\"NONE\",\"i\":788547877,\"l\":\"0.00000000\",
+// \"z\":\"0.00000000\",\"L\":\"0.00000000\",\"n\":\"0\",\"N\":null,\"T\":1669966676260,\"t\":-1,
+// \"I\":1945884977,\"w\":true,\"m\":false,\"M\":false,\"O\":1669966676260,\"Z\":\"0.00000000\",\"Y\":\"0.00000000\",\"Q\":\"0.00000000\"}")
+
+// client Text("{\"e\":\"executionReport\",\"E\":1669966676261,\"s\":\"BUSDUSDT\",\"c\":\"Ze8RSBoOCq8sTZOfAL65fJ\",
+// \"S\":\"BUY\",\"o\":\"LIMIT\",\"f\":\"GTC\",\"q\":\"10.00000000\",\"p\":\"1.00000000\",\"P\":\"0.00000000\",
+// \"F\":\"0.00000000\",\"g\":-1,\"C\":\"\",\"x\":\"TRADE\",\"X\":\"FILLED\",\"r\":\"NONE\",\"i\":788547877,\"l\":\"10.00000000\",
+// \"z\":\"10.00000000\",\"L\":\"1.00000000\",\"n\":\"0.00000000\",\"N\":\"BNB\",\"T\":1669966676260,\"t\":368830006,
+// \"I\":1945884978,\"w\":false,\"m\":false,\"M\":true,\"O\":1669966676260,\"Z\":\"10.00000000\",\"Y\":\"10.00000000\",\"Q\":\"0.00000000\"}")
+
 
 #[derive(Clone, Deserialize, Serialize, Debug)]
 pub struct BinanceCheckAllOrderResponse(Vec<BinanceCheckOrderResponse>);
