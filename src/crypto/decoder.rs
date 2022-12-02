@@ -85,7 +85,7 @@ pub struct BinanceOrderUpdatePayload{
     #[serde(rename = "m")]//
     is_trade_maker: bool,
     #[serde(rename = "M")]//
-    ignore_2: i64,
+    ignore_2: bool,
     #[serde(rename = "O")]//
     order_creation_time: i64,
     #[serde(rename = "Z")]//
