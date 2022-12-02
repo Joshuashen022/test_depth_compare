@@ -32,6 +32,8 @@ pub async fn send_request() {
         Err(e) => Err(format!("{:?}", e)),
     }.unwrap();
 
+    println!("connection success");
+    
     while let Ok(message) = stream.next().await.unwrap() {
         
         println!("client {:?}", message);
