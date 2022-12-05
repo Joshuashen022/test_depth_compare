@@ -1,5 +1,5 @@
 use super::runner::*;
-
+use anyhow::{Error, Result};
 // use ordered_float::OrderedFloat;
 // use serde::de::{SeqAccess, Visitor};
 use serde::{Deserialize, Serialize};
@@ -15,109 +15,190 @@ use hmac::{Hmac, Mac};
 use sha2::Sha256;
 type HmacSha256 = Hmac<Sha256>;
 #[derive(Clone, Deserialize, Serialize, Debug)]
-pub struct ListenKey{
+pub struct ListenKey {
     #[serde(rename = "listenKey")]
-    listen_key: String
+    listen_key: String,
 }
+
 #[derive(Clone, Deserialize, Serialize, Debug)]
-pub struct PayloadType{
+pub struct PayloadType {
     #[serde(rename = "e")]
     pub event_type: String,
 }
 
 #[derive(Clone, Deserialize, Serialize, Debug)]
-pub struct BinanceOrderUpdatePayload{
-    #[serde(rename = "e")]//
+pub struct BinanceOrderUpdatePayload {
+    #[serde(rename = "e")] //
     event_type: String,
-    #[serde(rename = "E")]//
+    #[serde(rename = "E")] //
     event_time: i64,
-    #[serde(rename = "s")]//
+    #[serde(rename = "s")] //
     symbol: String,
-    #[serde(rename = "c")]//
+    #[serde(rename = "c")] //
     client_order_id: String,
-    #[serde(rename = "S")]//
+    #[serde(rename = "S")] //
     side: String,
-    #[serde(rename = "o")]//
+    #[serde(rename = "o")] //
     order_type: String,
-    #[serde(rename = "f")]//
+    #[serde(rename = "f")] //
     time_in_force: String,
-    #[serde(rename = "q")]//
+    #[serde(rename = "q")] //
     order_quantity: String,
-    #[serde(rename = "p")]//
+    #[serde(rename = "p")] //
     order_price: String,
-    #[serde(rename = "P")]//
+    #[serde(rename = "P")] //
     stop_price: String,
     ///partial visable
     #[serde(rename = "d")]
     trailing_delta: Option<i64>,
-    #[serde(rename = "F")]//
+    #[serde(rename = "F")] //
     iceberg_quantity: String,
-    #[serde(rename = "g")]//
+    #[serde(rename = "g")] //
     order_list_id: i64,
     #[serde(rename = "C")]
     origin_client_order_id: Option<String>,
-    #[serde(rename = "x")]//
+    #[serde(rename = "x")] //
     current_execution_type: String,
-    #[serde(rename = "X")]//
+    #[serde(rename = "X")] //
     current_order_status: String,
-    #[serde(rename = "r")]//
+    #[serde(rename = "r")] //
     order_reject_reason: String,
-    #[serde(rename = "i")]//
+    #[serde(rename = "i")] //
     order_id: i64,
-    #[serde(rename = "l")]//
+    #[serde(rename = "l")] //
     last_executed_quantity: String,
-    #[serde(rename = "z")]//
+    #[serde(rename = "z")] //
     cumulative_filled_quantity: String,
-    #[serde(rename = "L")]//
+    #[serde(rename = "L")] //
     last_executed_price: String,
-    #[serde(rename = "n")]//
+    #[serde(rename = "n")] //
     commission_amount: String,
-    #[serde(rename = "N")]//
+    #[serde(rename = "N")] //
     comession_asset: Option<String>,
-    #[serde(rename = "T")]//
+    #[serde(rename = "T")] //
     transaction_time: i64,
-    #[serde(rename = "t")]//
+    #[serde(rename = "t")] //
     trade_id: i64,
-    #[serde(rename = "I")]//
+    #[serde(rename = "I")] //
     ignore_1: i64,
-    #[serde(rename = "w")]//
+    #[serde(rename = "w")] //
     is_on_book: bool,
-    #[serde(rename = "m")]//
+    #[serde(rename = "m")] //
     is_trade_maker: bool,
-    #[serde(rename = "M")]//
+    #[serde(rename = "M")] //
     ignore_2: bool,
-    #[serde(rename = "O")]//
+    #[serde(rename = "O")] //
     order_creation_time: i64,
-    #[serde(rename = "Z")]//
+    #[serde(rename = "Z")] //
     cumulative_transacted_quantity: String,
-    #[serde(rename = "Y")]//
+    #[serde(rename = "Y")] //
     last_transacted_quantity: String,
-    #[serde(rename = "Q")]//
+    #[serde(rename = "Q")] //
     quote_order_qty: String,
     #[serde(rename = "j")]
     strategy_id: Option<i64>,
     #[serde(rename = "J")]
     strategy_type: Option<i64>,
-
 }
 
-#[derive(Clone, Deserialize, Serialize)]
-pub struct OrderInfo{
+impl BinanceOrderUpdatePayload {
+    pub fn into_trade_and_order_info(self) -> Option<(Option<TradeInfo>, Option<OrderInfo>)> {
+        let mut trade_info = None;
+        let mut order_info = None;
+
+        let average_price = self.average_price().ok();
+        
+        match self.current_execution_type.as_str() {
+            "TRADE" => {
+                trade_info = Some(TradeInfo {
+                    commission_amount: self.commission_amount,
+                    comession_asset: self.comession_asset.clone(),
+                    trade_id: self.trade_id,
+                    transaction_time: self.transaction_time,
+                    last_executed_quantity: self.last_executed_quantity,
+                    last_executed_price: self.last_executed_price,
+                    order_id: self.order_id,
+                    client_order_id: self.client_order_id.clone(),
+                });
+                if &self.current_order_status == "FILLED" {
+
+                    let average_price = average_price?;
+
+                    order_info = Some(OrderInfo {
+                        order_price: self.order_price,
+                        order_quantity: self.order_quantity,
+                        order_id: self.order_id,
+                        client_order_id: self.client_order_id,
+                        order_creation_time: self.order_creation_time,
+                        event_time: self.event_time,
+                        cumulative_filled_quantity: self.cumulative_filled_quantity,
+                        cumulative_transacted_quantity: self.cumulative_transacted_quantity,
+                        comession_asset: self.comession_asset?,
+                        status: 2,
+                        average_price,
+                    })
+                }
+            }
+            "NEW" | "CANCELED" | "REJECTED" | "EXPIRED" => {
+                let status = match self.current_order_status.as_str(){
+                    "NEW" | "PARTIALLY_FILLED" => 1,
+                    "CANCELED" | "FILLED" | "REJECTED" | "EXPIRED" => 2,
+                    _ => return None
+                };
+                
+                let average_price = average_price?;
+
+                order_info = Some(OrderInfo {
+                    order_price: self.order_price,
+                    order_quantity: self.order_quantity,
+                    order_id: self.order_id,
+                    client_order_id: self.client_order_id,
+                    order_creation_time: self.order_creation_time,
+                    event_time: self.event_time,
+                    cumulative_filled_quantity: self.cumulative_filled_quantity,
+                    cumulative_transacted_quantity: self.cumulative_transacted_quantity,
+                    comession_asset: self.comession_asset?,
+                    status,
+                    average_price,
+                })
+
+            }
+            _ => {}
+        }
+
+        Some((trade_info, order_info))
+    }
+
+    fn average_price(&self) -> Result<f64>{
+        let cumulative_transacted_quantity =
+            self.cumulative_transacted_quantity.parse::<f64>()?;
+        let cumulative_filled_quantity =
+            self.cumulative_filled_quantity.parse::<f64>()?;
+        if cumulative_filled_quantity != 0.0 {
+            Ok(cumulative_transacted_quantity / cumulative_filled_quantity)
+        } else {
+            return Err(anyhow::anyhow!("cumulative_filled_quantity is zero"))
+        }
+    }
+}
+
+#[derive(Clone, Deserialize, Serialize, Debug)]
+pub struct OrderInfo {
     // orderInfo.OrderPrice
     order_price: String,
-    // orderInfo.Quantity 
+    // orderInfo.Quantity
     order_quantity: String,
-    // orderInfo.OrderId 
+    // orderInfo.OrderId
     order_id: i64,
     // orderInfo.ClientOrderId
     client_order_id: String,
-    // orderInfo.CreateTime 
+    // orderInfo.CreateTime
     order_creation_time: i64,
     // orderInfo.UpdateTime
     event_time: i64,
     // orderInfo.CumuTradeQty
     cumulative_filled_quantity: String,
-    // orderInfo.CumuTradeValue 
+    // orderInfo.CumuTradeValue
     cumulative_transacted_quantity: String,
     // orderInfo.FeeCurrency = msgMap["N"].String()
     comession_asset: String,
@@ -126,12 +207,12 @@ pub struct OrderInfo{
     // if repOrderMsg.GetOrderStream().CumuTradeQty != 0 {
     //     orderInfo.AvgPrice = orderInfo.CumuTradeValue / orderInfo.CumuTradeQty
     // }
-    average_price:i64
+    average_price: f64,
 }
 
-#[derive(Clone, Deserialize, Serialize)]
-pub struct  TradeInfo{
-    // tradeInfo.Fee 
+#[derive(Clone, Deserialize, Serialize, Debug)]
+pub struct TradeInfo {
+    // tradeInfo.Fee
     commission_amount: String,
     // tradeInfo.FeeCurrency
     comession_asset: Option<String>,
@@ -139,30 +220,18 @@ pub struct  TradeInfo{
     trade_id: i64,
     // tradeInfo.TradeTime
     transaction_time: i64,
-    // tradeInfo.TradeQty 
+    // tradeInfo.TradeQty
     last_executed_quantity: String,
     // tradeInfo.TradePrice
     last_executed_price: String,
-    // tradeInfo.OrderId 
+    // tradeInfo.OrderId
     order_id: i64,
     // tradeInfo.ClientOrderId
     client_order_id: String,
 }
 
-// client Text("{\"e\":\"executionReport\",\"E\":1669966676261,\"s\":\"BUSDUSDT\",\"c\":\"Ze8RSBoOCq8sTZOfAL65fJ\",
-// \"S\":\"BUY\",\"o\":\"LIMIT\",\"f\":\"GTC\",\"q\":\"10.00000000\",\"p\":\"1.00000000\",\"P\":\"0.00000000\",
-// \"F\":\"0.00000000\",\"g\":-1,\"C\":\"\",\"x\":\"NEW\",\"X\":\"NEW\",\"r\":\"NONE\",\"i\":788547877,\"l\":\"0.00000000\",
-// \"z\":\"0.00000000\",\"L\":\"0.00000000\",\"n\":\"0\",\"N\":null,\"T\":1669966676260,\"t\":-1,
-// \"I\":1945884977,\"w\":true,\"m\":false,\"M\":false,\"O\":1669966676260,\"Z\":\"0.00000000\",\"Y\":\"0.00000000\",\"Q\":\"0.00000000\"}")
-
-// client Text("{\"e\":\"executionReport\",\"E\":1669966676261,\"s\":\"BUSDUSDT\",\"c\":\"Ze8RSBoOCq8sTZOfAL65fJ\",
-// \"S\":\"BUY\",\"o\":\"LIMIT\",\"f\":\"GTC\",\"q\":\"10.00000000\",\"p\":\"1.00000000\",\"P\":\"0.00000000\",
-// \"F\":\"0.00000000\",\"g\":-1,\"C\":\"\",\"x\":\"TRADE\",\"X\":\"FILLED\",\"r\":\"NONE\",\"i\":788547877,\"l\":\"10.00000000\",
-// \"z\":\"10.00000000\",\"L\":\"1.00000000\",\"n\":\"0.00000000\",\"N\":\"BNB\",\"T\":1669966676260,\"t\":368830006,
-// \"I\":1945884978,\"w\":false,\"m\":false,\"M\":true,\"O\":1669966676260,\"Z\":\"10.00000000\",\"Y\":\"10.00000000\",\"Q\":\"0.00000000\"}")
-
 #[derive(Clone, Deserialize, Serialize, Debug)]
-pub struct OutboundAccountPositionPayload{
+pub struct OutboundAccountPositionPayload {
     #[serde(rename = "e")]
     event_type: String,
     #[serde(rename = "E")]
@@ -170,11 +239,11 @@ pub struct OutboundAccountPositionPayload{
     #[serde(rename = "u")]
     account_last_update_time: i64,
     #[serde(rename = "B")]
-    balance: Vec<Balance>
+    balance: Vec<Balance>,
 }
 
 #[derive(Clone, Deserialize, Serialize, Debug)]
-pub struct Balance{
+pub struct Balance {
     #[serde(rename = "a")]
     name: String,
     #[serde(rename = "f")]
@@ -182,26 +251,21 @@ pub struct Balance{
     #[serde(rename = "l")]
     frozen_amount: String,
 }
-pub struct Hasher{
+
+pub struct Hasher {
     pub secret_key: String,
     pub api_key: String,
     pub raw_message: String,
 }
 
-impl Hasher{
-
-    pub fn hash(&self) -> String{
-        
+impl Hasher {
+    pub fn hash(&self) -> String {
         let mut mac = HmacSha256::new_from_slice(self.secret_key.as_bytes()).unwrap();
         mac.update(self.raw_message.as_bytes());
         let hash_bytes = mac.finalize().into_bytes();
         encode(hash_bytes)
     }
-
 }
-
-
-
 
 #[cfg(test)]
 mod test {
