@@ -1,6 +1,7 @@
 use super::decoder::{
-    BinanceOrderUpdatePayload, ListenKey, OutboundAccountPositionPayload, PayloadType,
+    BinanceOrderUpdatePayload, OutboundAccountPositionPayload, PayloadType,
 };
+use super::maintain_key::send_get_key_request;
 use futures_util::SinkExt;
 use futures_util::StreamExt;
 use reqwest;
@@ -21,7 +22,9 @@ pub const ACCESS_KEY: &str = "nifNGIXIzco8YXe3PpuD0zMXvJN33WpWdNNxHl1GLb1JIS5n9T
 pub const SECRET_KEY: &str = "atl3kPizvOkgM366O2OPbotuQpbWIxH2M4IEbvAwwqxey6amjKODfb0mBsVNpji1";
 
 pub async fn send_request() {
-    let listen_key = "dFWgBIKZkVdqXZhcuHj5rk6JX1a0E555xQiEzn72sAK3fAtYI0P6JuzHPgs0";
+
+    let listen_key = send_get_key_request().await;
+    println!("getting key {:?}", listen_key);
 
     let address = format!("{}{}", BINANCE_SPOT_WEBSOCKET_ENDPOINT, listen_key);
     println!("url {:?}", address);
