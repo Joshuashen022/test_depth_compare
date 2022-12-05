@@ -77,7 +77,7 @@ pub async fn send_request() {
                                 continue;
                             }
                         };
-                        match payload.clone().into_trade_and_order_info(){
+                        match payload.clone().into_trade_and_order_info_debug(){
                             Ok((trade, order)) => {
                                 println!("trade info {:?}", trade);
                                 println!("order info {:?}", order);
