@@ -21,7 +21,7 @@ pub const ACCESS_KEY: &str = "nifNGIXIzco8YXe3PpuD0zMXvJN33WpWdNNxHl1GLb1JIS5n9T
 pub const SECRET_KEY: &str = "atl3kPizvOkgM366O2OPbotuQpbWIxH2M4IEbvAwwqxey6amjKODfb0mBsVNpji1";
 
 pub async fn send_request() {
-    let listen_key = "TkpK82Ab5yGqEqY71MH2OF78HvbmEMZwvtbXVw8SiibyNUw20iT1aTDR1FLA";
+    let listen_key = "dFWgBIKZkVdqXZhcuHj5rk6JX1a0E555xQiEzn72sAK3fAtYI0P6JuzHPgs0";
 
     let address = format!("{}{}", BINANCE_SPOT_WEBSOCKET_ENDPOINT, listen_key);
     println!("url {:?}", address);
