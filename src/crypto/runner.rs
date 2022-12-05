@@ -77,12 +77,15 @@ pub async fn send_request() {
                                 continue;
                             }
                         };
-                        if let Ok((trade, order)) =  payload.clone().into_trade_and_order_info(){
-                            println!("trade info {:?}", trade);
-                            println!("order info {:?}", order);
-                        } else {
-                            println!("get trade and order info error {:?}", payload);
-                        }
+                        match payload.clone().into_trade_and_order_info(){
+                            Ok((trade, order)) => {
+                                println!("trade info {:?}", trade);
+                                println!("order info {:?}", order);
+                            },
+                            Err(e) => {
+                                println!("get trade and order info error {:?}", e);
+                            }
+                        }                        
                     }
                     _ => println!("unknown event type: {:?}", event.event_type),
                 }
