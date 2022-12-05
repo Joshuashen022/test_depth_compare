@@ -74,9 +74,11 @@ pub async fn send_request() {
                                 continue;
                             }
                         };
-                        if let Some((trade, order)) =  payload.into_trade_and_order_info(){
+                        if let Some((trade, order)) =  payload.clone().into_trade_and_order_info(){
                             println!("trade info {:?}", trade);
                             println!("order info {:?}", order);
+                        } else {
+                            println!("get trade and order info error {:?}", payload);
                         }
                     }
                     _ => println!("unknown event type: {:?}", event.event_type),
