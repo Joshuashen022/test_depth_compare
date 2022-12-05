@@ -102,6 +102,8 @@ pub struct BinanceOrderUpdatePayload {
 }
 
 impl BinanceOrderUpdatePayload {
+    
+    #[allow(dead_code)]
     pub fn into_trade_and_order_info(self) -> Result<(Option<TradeInfo>, Option<OrderInfo>)> {
         let mut trade_info = None;
         let mut order_info = None;
@@ -174,13 +176,11 @@ impl BinanceOrderUpdatePayload {
     pub fn into_trade_and_order_info_debug(self) -> Result<(Option<TradeInfo>, Option<OrderInfo>)> {
         let mut trade_info = None;
         let mut order_info = None;
-
-        let average_price = self.average_price();
         
         if self.comession_asset.is_none(){
             println!("comession_asset is empty")
         }
-        
+
         let comession_asset = String::new();
 
         match self.current_execution_type.as_str() {
@@ -197,7 +197,7 @@ impl BinanceOrderUpdatePayload {
                 });
                 if &self.current_order_status == "FILLED" {
 
-                    let average_price = average_price?;
+                    let average_price = 1.0;
 
                     order_info = Some(OrderInfo {
                         order_price: self.order_price,
@@ -221,7 +221,7 @@ impl BinanceOrderUpdatePayload {
                     _ => return Err(anyhow!("comession_asset is empty"))
                 };
                 
-                let average_price = average_price?;
+                let average_price = 1.0;
 
                 order_info = Some(OrderInfo {
                     order_price: self.order_price,
