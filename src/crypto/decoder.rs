@@ -1,5 +1,5 @@
 use super::runner::*;
-use anyhow::{Error, Result};
+use anyhow::{Error, Result, anyhow};
 // use ordered_float::OrderedFloat;
 // use serde::de::{SeqAccess, Visitor};
 use serde::{Deserialize, Serialize};
@@ -102,17 +102,19 @@ pub struct BinanceOrderUpdatePayload {
 }
 
 impl BinanceOrderUpdatePayload {
-    pub fn into_trade_and_order_info(self) -> Option<(Option<TradeInfo>, Option<OrderInfo>)> {
+    pub fn into_trade_and_order_info(self) -> Result<(Option<TradeInfo>, Option<OrderInfo>)> {
         let mut trade_info = None;
         let mut order_info = None;
 
-        let average_price = self.average_price().ok();
+        let average_price = self.average_price();
         
+        let comession_asset = self.comession_asset.ok_or(anyhow!("comession_asset is empty"))?;
+
         match self.current_execution_type.as_str() {
             "TRADE" => {
                 trade_info = Some(TradeInfo {
                     commission_amount: self.commission_amount,
-                    comession_asset: self.comession_asset.clone(),
+                    comession_asset: Some(comession_asset.clone()),
                     trade_id: self.trade_id,
                     transaction_time: self.transaction_time,
                     last_executed_quantity: self.last_executed_quantity,
@@ -133,7 +135,7 @@ impl BinanceOrderUpdatePayload {
                         event_time: self.event_time,
                         cumulative_filled_quantity: self.cumulative_filled_quantity,
                         cumulative_transacted_quantity: self.cumulative_transacted_quantity,
-                        comession_asset: self.comession_asset?,
+                        comession_asset,
                         status: 2,
                         average_price,
                     })
@@ -143,7 +145,7 @@ impl BinanceOrderUpdatePayload {
                 let status = match self.current_order_status.as_str(){
                     "NEW" | "PARTIALLY_FILLED" => 1,
                     "CANCELED" | "FILLED" | "REJECTED" | "EXPIRED" => 2,
-                    _ => return None
+                    _ => return Err(anyhow!("comession_asset is empty"))
                 };
                 
                 let average_price = average_price?;
@@ -157,7 +159,7 @@ impl BinanceOrderUpdatePayload {
                     event_time: self.event_time,
                     cumulative_filled_quantity: self.cumulative_filled_quantity,
                     cumulative_transacted_quantity: self.cumulative_transacted_quantity,
-                    comession_asset: self.comession_asset?,
+                    comession_asset,
                     status,
                     average_price,
                 })
@@ -166,7 +168,7 @@ impl BinanceOrderUpdatePayload {
             _ => {}
         }
 
-        Some((trade_info, order_info))
+        Ok((trade_info, order_info))
     }
 
     fn average_price(&self) -> Result<f64>{
