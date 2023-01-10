@@ -85,7 +85,7 @@ pub async fn send_http_request() {
     let params = GetAccountSummary{currency:"USD".into()};
     
     // let method = "private/create-order";
-    let method = "private/get-account-summary";
+    let method = "private/get-account-sumary";
     let id = 11;
     let mut req = CryptoRequest::new(method, id, params);
     req.sign(ACCESS_KEY, SECRET_KEY);
