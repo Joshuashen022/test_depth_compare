@@ -74,18 +74,18 @@ pub async fn send_websocket_request() {
 }
 
 pub async fn send_http_request() {
-    // let instrument_name = "USD_USDT";
-    // let is_buy = true;
-    // let amount = "10";
-    // let price = "1";
-    // let client_oid = "3a941ae3-d1b8-4889-8aff-777a78529ce5";
-    // let is_maker = false;
-    // let params = CreateOrder::new(instrument_name, is_buy, price, amount, client_oid, is_maker);
+    let instrument_name = "USD_USDT";
+    let is_buy = true;
+    let amount = "10";
+    let price = "1";
+    let client_oid = "3a941ae3-d1b8-4889-8aff-777a78529ce5";
+    let is_maker = false;
+    let params = CreateOrder::new(instrument_name, is_buy, price, amount, client_oid, is_maker);
     
-    let params = GetAccountSummary{currency:"USD".into()};
+    // let params = GetAccountSummary{currency:"USD".into()};
     
-    // let method = "private/create-order";
-    let method = "private/get-account-summary";
+    let method = "private/create-order";
+    // let method = "private/get-account-summary";
     let id = 11;
     let mut req = CryptoRequest::new(method, id, params);
     req.sign(ACCESS_KEY, SECRET_KEY);
