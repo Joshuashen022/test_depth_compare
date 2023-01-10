@@ -1,6 +1,6 @@
 use super::*;
-use url::Url;
 use serde::{Deserialize, Serialize};
+use url::Url;
 
 const TRADE_URL_SPOT: &str = "https://api.binance.com";
 // const BINANCE_SPOT_WEBSOCKET_ENDPOINT: &str = "wss://stream.binance.com:9443/ws/";
@@ -9,13 +9,11 @@ const TRADE_URL_SPOT: &str = "https://api.binance.com";
 // const API_ORDER : &str = "/api/v3/order";
 // const API_OPEN_ORDERS : &str = "/api/v3/openOrders";
 // const API_ALL_ORDERS : &str = "/api/v3/allOrders";
-const API_USER_DATA_STREAM : &str = "/api/v3/userDataStream";
+const API_USER_DATA_STREAM: &str = "/api/v3/userDataStream";
 pub const ACCESS_KEY: &str = "nifNGIXIzco8YXe3PpuD0zMXvJN33WpWdNNxHl1GLb1JIS5n9TttdcIxlZnHQhGA";
 pub const SECRET_KEY: &str = "atl3kPizvOkgM366O2OPbotuQpbWIxH2M4IEbvAwwqxey6amjKODfb0mBsVNpji1";
 
-
-pub async fn send_get_key_request() -> String{
-
+pub async fn send_get_key_request() -> String {
     let url_str = format!("{}{}", TRADE_URL_SPOT, API_USER_DATA_STREAM);
 
     let res = get_listen_key(url_str).await;
@@ -35,7 +33,6 @@ pub async fn send_prolong_key_request(listen_key: &str) {
     println!("client {:?}", res);
     assert_eq!(res, "{}");
     println!("Done");
-
 }
 
 // url: https://api.binance.com/api/v3/order
@@ -56,13 +53,11 @@ async fn prolong_key(url: String, body: String) -> String {
         .unwrap()
 }
 
-
 #[derive(Clone, Deserialize, Serialize, Debug)]
-pub struct ListenKey{
+pub struct ListenKey {
     #[serde(rename = "listenKey")]
-    listen_key: String
+    listen_key: String,
 }
-
 
 async fn get_listen_key(url: String) -> String {
     println!("url {:?}", url);

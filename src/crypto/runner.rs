@@ -1,6 +1,6 @@
+use super::crypto_deocder::*;
 use super::decoder::*;
 use super::maintain_key::*;
-use super::crypto_deocder::*;
 use futures_util::SinkExt;
 use futures_util::StreamExt;
 
@@ -23,7 +23,8 @@ pub const SECRET_KEY: &str = "kzdsGyuuFBHGUjo22TepXa";
 // pub const ACCESS_KEY: &str = "nifNGIXIzco8YXe3PpuD0zMXvJN33WpWdNNxHl1GLb1JIS5n9TttdcIxlZnHQhGA";
 // pub const SECRET_KEY: &str = "atl3kPizvOkgM366O2OPbotuQpbWIxH2M4IEbvAwwqxey6amjKODfb0mBsVNpji1";
 
-pub async fn send_request() {
+#[allow(dead_code)]
+pub async fn send_websocket_request() {
     let instrument_name = "USD_USDT";
     let is_buy = true;
     let amount = "10";
@@ -31,10 +32,10 @@ pub async fn send_request() {
     let client_oid = "3a941ae3-d1b8-4889-8aff-777a78529ce5";
     let is_maker = false;
 
-    let param = CreateOrder::new(instrument_name, is_buy, price, amount, client_oid, is_maker);
+    let params = CreateOrder::new(instrument_name, is_buy, price, amount, client_oid, is_maker);
     let method = "private/create-order";
     let id = 11;
-    let mut req = CryptoRequest::new(method, id, param);
+    let mut req = CryptoRequest::new(method, id, params);
     req.sign(ACCESS_KEY, SECRET_KEY);
     println!("Crypto request {:?}", req);
 
@@ -69,4 +70,37 @@ pub async fn send_request() {
     // let after: EmptyRespond = serde_json::from_str(&res).unwrap();
     // println!("after {:?}", after);
     println!("Done");
+}
+
+pub async fn send_http_request() {
+    let instrument_name = "USD_USDT";
+    let is_buy = true;
+    let amount = "10";
+    let price = "1";
+    let client_oid = "3a941ae3-d1b8-4889-8aff-777a78529ce5";
+    let is_maker = false;
+
+    let params = CreateOrder::new(instrument_name, is_buy, price, amount, client_oid, is_maker);
+    let method = "private/create-order";
+    let id = 11;
+    let mut req = CryptoRequest::new(method, id, params);
+    req.sign(ACCESS_KEY, SECRET_KEY);
+    println!("Crypto request {:?}", req);
+
+    let address = CRYPTO_WEBSOCKET_WSS2.to_string();
+    println!("url {:?}", address);
+
+    let client = reqwest::Client::new();
+    let url = Url::parse(&address).expect("Bad URL");
+    let message = serde_json::to_string(&req).unwrap();
+    let response = client
+        .post(url)
+        .body(message)
+        .header("X-MBX-APIKEY", ACCESS_KEY)
+        .send()
+        .await
+        .unwrap();
+    println!("connection success");
+    let res = response.text().await.unwrap();
+    println!("Done {}", res);
 }

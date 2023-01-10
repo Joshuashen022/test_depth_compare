@@ -2,7 +2,6 @@ mod crypto;
 mod crypto_decode;
 mod deep;
 
-use crypto::runner::send_request;
 use deep::{get_infustructure, BinanceSpotOrderBookSnapshot, DepthRow, Event, LevelEvent};
 use futures_util::StreamExt;
 // use serde::de::Error;
@@ -13,7 +12,7 @@ const LEVEL_DEPTH_URL: &str = "wss://stream.binance.com:9443/ws/bnbbtc@depth20@1
 // const MAX_BUFFER: usize = 30;
 #[tokio::main]
 async fn main() {
-    send_request().await;
+    crypto::runner::send_http_request().await;
 
     loop {
         let url = Url::parse(LEVEL_DEPTH_URL).expect("Bad URL");

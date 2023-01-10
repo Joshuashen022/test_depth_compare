@@ -1,10 +1,10 @@
-use anyhow::{Error, Result, anyhow};
+use anyhow::{anyhow, Error, Result};
 
-use serde::{Deserialize, Serialize};
-use std::time::{SystemTime, UNIX_EPOCH};
 use hex::encode;
 use hmac::{Hmac, Mac};
+use serde::{Deserialize, Serialize};
 use sha2::Sha256;
+use std::time::{SystemTime, UNIX_EPOCH};
 type HmacSha256 = Hmac<Sha256>;
 #[derive(Clone, Deserialize, Serialize, Debug)]
 pub struct ListenKey {
@@ -93,15 +93,16 @@ pub struct BinanceOrderUpdatePayload {
 }
 
 impl BinanceOrderUpdatePayload {
-    
     #[allow(dead_code)]
     pub fn into_trade_and_order_info(self) -> Result<(Option<TradeInfo>, Option<OrderInfo>)> {
         let mut trade_info = None;
         let mut order_info = None;
 
         let average_price = self.average_price();
-        
-        let comession_asset = self.comession_asset.ok_or(anyhow!("comession_asset is empty"))?;
+
+        let comession_asset = self
+            .comession_asset
+            .ok_or(anyhow!("comession_asset is empty"))?;
 
         match self.current_execution_type.as_str() {
             "TRADE" => {
@@ -116,7 +117,6 @@ impl BinanceOrderUpdatePayload {
                     client_order_id: self.client_order_id.clone(),
                 });
                 if &self.current_order_status == "FILLED" {
-
                     let average_price = average_price?;
 
                     order_info = Some(OrderInfo {
@@ -135,12 +135,12 @@ impl BinanceOrderUpdatePayload {
                 }
             }
             "NEW" | "CANCELED" | "REJECTED" | "EXPIRED" => {
-                let status = match self.current_order_status.as_str(){
+                let status = match self.current_order_status.as_str() {
                     "NEW" | "PARTIALLY_FILLED" => 1,
                     "CANCELED" | "FILLED" | "REJECTED" | "EXPIRED" => 2,
-                    _ => return Err(anyhow!("comession_asset is empty"))
+                    _ => return Err(anyhow!("comession_asset is empty")),
                 };
-                
+
                 let average_price = average_price?;
 
                 order_info = Some(OrderInfo {
@@ -156,7 +156,6 @@ impl BinanceOrderUpdatePayload {
                     status,
                     average_price,
                 })
-
             }
             _ => {}
         }
@@ -167,8 +166,8 @@ impl BinanceOrderUpdatePayload {
     pub fn into_trade_and_order_info_mock(self) -> Result<(Option<TradeInfo>, Option<OrderInfo>)> {
         let mut trade_info = None;
         let mut order_info = None;
-        
-        if self.comession_asset.is_none(){
+
+        if self.comession_asset.is_none() {
             println!("comession_asset is empty")
         }
 
@@ -187,7 +186,6 @@ impl BinanceOrderUpdatePayload {
                     client_order_id: self.client_order_id.clone(),
                 });
                 if &self.current_order_status == "FILLED" {
-
                     let average_price = 1.0;
 
                     order_info = Some(OrderInfo {
@@ -206,12 +204,12 @@ impl BinanceOrderUpdatePayload {
                 }
             }
             "NEW" | "CANCELED" | "REJECTED" | "EXPIRED" => {
-                let status = match self.current_order_status.as_str(){
+                let status = match self.current_order_status.as_str() {
                     "NEW" | "PARTIALLY_FILLED" => 1,
                     "CANCELED" | "FILLED" | "REJECTED" | "EXPIRED" => 2,
-                    _ => return Err(anyhow!("comession_asset is empty"))
+                    _ => return Err(anyhow!("comession_asset is empty")),
                 };
-                
+
                 let average_price = 1.0;
 
                 order_info = Some(OrderInfo {
@@ -227,7 +225,6 @@ impl BinanceOrderUpdatePayload {
                     status,
                     average_price,
                 })
-
             }
             _ => {}
         }
@@ -235,39 +232,36 @@ impl BinanceOrderUpdatePayload {
         Ok((trade_info, order_info))
     }
 
-
-    fn average_price(&self) -> Result<f64>{
-        let cumulative_transacted_quantity =
-            self.cumulative_transacted_quantity.parse::<f64>()?;
-        let cumulative_filled_quantity =
-            self.cumulative_filled_quantity.parse::<f64>()?;
+    fn average_price(&self) -> Result<f64> {
+        let cumulative_transacted_quantity = self.cumulative_transacted_quantity.parse::<f64>()?;
+        let cumulative_filled_quantity = self.cumulative_filled_quantity.parse::<f64>()?;
         if cumulative_filled_quantity != 0.0 {
             Ok(cumulative_transacted_quantity / cumulative_filled_quantity)
         } else {
-            return Err(anyhow::anyhow!("cumulative_filled_quantity is zero"))
+            return Err(anyhow::anyhow!("cumulative_filled_quantity is zero"));
         }
     }
 }
 #[derive(Clone, PartialEq)]
 pub struct OrderStreamReply {
-    pub status: i32, // status
-    pub order_price: f64, // order_price
-    pub quantity: f64, // order_quantity
-    pub order_id: String, // order_id
+    pub status: i32,             // status
+    pub order_price: f64,        // order_price
+    pub quantity: f64,           // order_quantity
+    pub order_id: String,        // order_id
     pub client_order_id: String, // client_order_id
-    pub create_time: u64, // order_creation_time
-    pub update_time: u64, // event_time
-    pub cumu_trade_qty: f64, // cumulative_filled_quantity
-    pub cumu_trade_value: f64, // cumulative_transacted_quantity
-    pub avg_price: f64, // average_price
-    pub fee_currency: String, // comession_asset
+    pub create_time: u64,        // order_creation_time
+    pub update_time: u64,        // event_time
+    pub cumu_trade_qty: f64,     // cumulative_filled_quantity
+    pub cumu_trade_value: f64,   // cumulative_transacted_quantity
+    pub avg_price: f64,          // average_price
+    pub fee_currency: String,    // comession_asset
     pub reason: String,
 }
 
 #[derive(Clone, Deserialize, Serialize, Debug)]
 pub struct OrderInfo {
     // orderInfo.OrderPrice
-    order_price: String, 
+    order_price: String,
     // orderInfo.Quantity
     order_quantity: String,
     // orderInfo.OrderId
@@ -294,16 +288,16 @@ pub struct OrderInfo {
 
 #[derive(Clone, PartialEq)]
 pub struct TradeStreamReply {
-    pub fee: f64, // commission_amount
-    pub trade_time: u64, // transaction_time
+    pub fee: f64,         // commission_amount
+    pub trade_time: u64,  // transaction_time
     pub trade_price: f64, // last_executed_price
-    pub trade_qty: f64, // last_executed_quantity
+    pub trade_qty: f64,   // last_executed_quantity
     pub cumu_trade_qty: f64,
     pub cumu_trade_value: f64,
-    pub fee_currency: String, // comession_asset
-    pub order_id: String, // order_id
+    pub fee_currency: String,    // comession_asset
+    pub order_id: String,        // order_id
     pub client_order_id: String, // client_order_id
-    pub trade_id: String, // trade_id
+    pub trade_id: String,        // trade_id
 }
 
 #[derive(Clone, Deserialize, Serialize, Debug)]
@@ -369,7 +363,6 @@ mod test {
     use hmac::{Hmac, Mac};
     use sha2::Sha256;
 
-
     #[test]
     fn sha256_test() {
         type HmacSha256 = Hmac<Sha256>;
@@ -387,10 +380,9 @@ mod test {
         );
     }
 
-
     #[test]
-    fn hash_map_test(){
-        let mut a: Vec<(String,String)> = Vec::new();
+    fn hash_map_test() {
+        let mut a: Vec<(String, String)> = Vec::new();
         let _ = a.push(("zac".to_string(), "123".to_string()));
         let _ = a.push(("abc".to_string(), "123".to_string()));
         let _ = a.push(("ccc".to_string(), "123".to_string()));
@@ -399,7 +391,7 @@ mod test {
 
         a.sort();
 
-        for (k, v) in a.iter(){
+        for (k, v) in a.iter() {
             println!("k: {}, v: {}", k, v);
         }
     }
