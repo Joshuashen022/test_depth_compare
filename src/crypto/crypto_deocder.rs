@@ -89,7 +89,7 @@ impl CryptoParams{
 }
 #[derive(Clone, Serialize, Debug)]
 pub struct CryptoRequest<Params:Clone>{
-    id: i32,
+    id: i64,
     method: String,
     /// (key, value)
     params: Params,
@@ -99,7 +99,7 @@ pub struct CryptoRequest<Params:Clone>{
 }
 
 impl<Params:CryptoDecode + Clone> CryptoRequest<Params>{
-    pub fn new(method: &str, id: i32, params: Params) -> Self{
+    pub fn new(method: &str, id: i64, params: Params) -> Self{
         let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
         CryptoRequest { 
             method: method.to_string(),
