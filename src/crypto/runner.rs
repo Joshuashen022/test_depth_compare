@@ -40,7 +40,7 @@ pub async fn send_websocket_request() {
     req.sign(ACCESS_KEY, SECRET_KEY);
     println!("Crypto request {:?}", req);
 
-    let address = CRYPTO_WEBSOCKET_WSS2.to_string();
+    let address = format!("{}/{}", CRYPTO_WEBSOCKET_WSS2, method);
     println!("url {:?}", address);
 
     let url = Url::parse(&address).expect("Bad URL");
