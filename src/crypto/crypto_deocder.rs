@@ -93,7 +93,7 @@ pub struct CryptoRequest<Params:Clone>{
     method: String,
     /// (key, value)
     params: Params,
-    api_key: String,
+    // api_key: String,
     // sig: String,
     nonce: i64,
 }
@@ -103,7 +103,7 @@ impl<Params:CryptoDecode + Clone> CryptoRequest<Params>{
         let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
         CryptoRequest { 
             method: method.to_string(),
-            api_key: String::new(),
+            // api_key: String::new(),
             id, 
             params, 
             nonce: now.as_millis() as i64,
@@ -113,7 +113,7 @@ impl<Params:CryptoDecode + Clone> CryptoRequest<Params>{
 
     pub fn sign(&mut self, api_key: &str, secret_key: &str){
         let _sig = self.sign_request(api_key, secret_key);
-        self.api_key = api_key.to_string();
+        // self.api_key = api_key.to_string();
         // self.sig = sig;
     }
 
