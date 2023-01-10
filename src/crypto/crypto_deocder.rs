@@ -1,19 +1,19 @@
+use serde::Serialize;
+use std::time::{SystemTime, UNIX_EPOCH};
 use hex::encode;
 use hmac::{Hmac, Mac};
-use serde::Serialize;
 use sha2::Sha256;
-use std::time::{SystemTime, UNIX_EPOCH};
 type HmacSha256 = Hmac<Sha256>;
 
-pub trait CryptoDecode {
+pub trait CryptoDecode{
     fn into_string(self) -> String;
 }
 #[derive(Clone, Debug, Serialize)]
-pub struct GetAccountSummary {
+pub struct GetAccountSummary{
     pub currency: String,
 }
 
-impl CryptoDecode for GetAccountSummary {
+impl CryptoDecode for GetAccountSummary{
     fn into_string(self) -> String {
         let mut params = Vec::new();
         params.push(("currency".into(), self.currency));
@@ -22,20 +22,20 @@ impl CryptoDecode for GetAccountSummary {
 }
 
 #[derive(Clone, Debug, Serialize)]
-pub struct CreateOrder {
+pub struct CreateOrder{
     pub instrument_name: String,
     pub side: String,
-    pub r#type: String,
+    pub r#type:String,
     pub price: String,
     pub quantity: String,
     pub notional: Option<String>,
     pub client_oid: String,
     pub time_in_force: Option<String>,
     pub exec_inst: String,
-    pub trigger_price: Option<String>,
+    pub trigger_price: Option<String>
 }
 
-impl CreateOrder {
+impl CreateOrder{
     pub fn new(
         instrument_name: &str,
         is_buy: bool,
@@ -43,27 +43,23 @@ impl CreateOrder {
         amount: &str,
         client_oid: &str,
         is_maker: bool,
-    ) -> Self {
-        CreateOrder {
+    ) -> Self{
+        CreateOrder{
             instrument_name: instrument_name.to_string(),
-            side: if is_buy { "BUY".into() } else { "SELL".into() },
-            r#type: "LIMIT".into(),
+            side: if is_buy {"BUY".into()} else{"SELL".into()},
+            r#type:"LIMIT".into(),
             price: price.into(),
             quantity: amount.into(),
             notional: None,
             client_oid: client_oid.into(),
             time_in_force: None,
-            exec_inst: if is_maker {
-                "POST_ONLY".into()
-            } else {
-                "".into()
-            },
-            trigger_price: None,
+            exec_inst: if is_maker{"POST_ONLY".into()}else{"".into()},
+            trigger_price: None
         }
     }
 }
 
-impl CryptoDecode for CreateOrder {
+impl CryptoDecode for CreateOrder{
     fn into_string(self) -> String {
         let mut params = Vec::new();
         params.push(("instrument_name".into(), self.instrument_name));
@@ -77,14 +73,14 @@ impl CryptoDecode for CreateOrder {
     }
 }
 
-pub struct CryptoParams(Vec<(String, String)>);
+pub struct CryptoParams(Vec<(String,String)>);
 
-impl CryptoParams {
-    fn into_string(self) -> String {
+impl CryptoParams{
+    fn into_string(self) -> String{
         let mut result = String::new();
         let mut params = self.0;
         params.sort();
-        for (key, value) in params.iter() {
+        for (key, value) in params.iter(){
             result += key;
             result += value;
         }
@@ -92,30 +88,30 @@ impl CryptoParams {
     }
 }
 #[derive(Clone, Serialize, Debug)]
-pub struct CryptoRequest<Params: Clone> {
+pub struct CryptoRequest<Params:Clone>{
     id: i32,
     method: String,
-    api_key: String,
     /// (key, value)
     params: Params,
-    nonce: i64,
+    api_key: String,
     sig: String,
+    nonce: i64,
 }
 
-impl<Params: CryptoDecode + Clone> CryptoRequest<Params> {
-    pub fn new(method: &str, id: i32, params: Params) -> Self {
+impl<Params:CryptoDecode + Clone> CryptoRequest<Params>{
+    pub fn new(method: &str, id: i32, params: Params) -> Self{
         let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
-        CryptoRequest {
+        CryptoRequest { 
             method: method.to_string(),
             api_key: String::new(),
-            id,
-            params,
+            id, 
+            params, 
             nonce: now.as_millis() as i64,
             sig: String::new(),
         }
     }
 
-    pub fn sign(&mut self, api_key: &str, secret_key: &str) {
+    pub fn sign(&mut self, api_key: &str, secret_key: &str){
         let sig = self.sign_request(api_key, secret_key);
         self.api_key = api_key.to_string();
         self.sig = sig;
@@ -127,8 +123,8 @@ impl<Params: CryptoDecode + Clone> CryptoRequest<Params> {
         let nonce = self.nonce;
         let method = self.method.clone();
         let sig_payload = format!("{}{}{}{}{}", method, id, api_key, params, nonce);
-
-        let hash = Hasher {
+    
+        let hash = Hasher{
             secret_key: secret_key.to_string(),
             api_key: api_key.to_string(),
             raw_message: sig_payload,
@@ -151,3 +147,4 @@ impl Hasher {
         encode(hash_bytes)
     }
 }
+
