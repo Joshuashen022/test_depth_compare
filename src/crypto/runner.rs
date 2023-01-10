@@ -94,6 +94,8 @@ pub async fn send_http_request() {
     let client = reqwest::Client::new();
     let url = Url::parse(&address).expect("Bad URL");
     let message = serde_json::to_string(&req).unwrap();
+    println!("body {:?}", message);
+
     let response = client
         .post(url)
         .body(message)
