@@ -91,7 +91,7 @@ pub async fn send_http_request() {
     req.sign(ACCESS_KEY, SECRET_KEY);
     println!("Crypto request {:?}", req);
 
-    let address = format!("{}/{}", CRYPTO_WEBSOCKET_WSS2, method);
+    let address = format!("{}/{}", CRYPTO_TRADE_HTTP, method);
     println!("url {:?}", address);
 
     let client = reqwest::Client::new();
