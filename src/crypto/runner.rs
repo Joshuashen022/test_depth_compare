@@ -51,50 +51,7 @@ pub async fn send_request() {
                 stream.send(Message::Pong(inner.clone())).await.unwrap();
             }
             Message::Text(inner) => {
-                let event: PayloadType = match serde_json::from_str(inner) {
-                    Ok(e) => e,
-                    Err(e) => {
-                        println!("{:?}", e);
-                        continue;
-                    }
-                };
-                match event.event_type.as_str() {
-                    "outboundAccountPosition" => {
-                        let _payload: OutboundAccountPositionPayload =
-                            match serde_json::from_str(inner) {
-                                Ok(e) => e,
-                                Err(e) => {
-                                    println!(
-                                        "Deserialize OutboundAccountPositionPayload error {:?}",
-                                        e
-                                    );
-                                    continue;
-                                }
-                            };
-                    }
-                    "executionReport" => {
-                        let payload: BinanceOrderUpdatePayload = match serde_json::from_str(inner) {
-                            Ok(e) => e,
-                            Err(e) => {
-                                println!(
-                                    "Deserialize BinanceOrderUpdatePayload error {:?}",
-                                    e
-                                );
-                                continue;
-                            }
-                        };
-                        match payload.clone().into_trade_and_order_info_mock(){
-                            Ok((trade, order)) => {
-                                println!("trade info {:?}", trade);
-                                println!("order info {:?}", order);
-                            },
-                            Err(e) => {
-                                println!("get trade and order info error {:?}", e);
-                            }
-                        }                        
-                    }
-                    _ => println!("unknown event type: {:?}", event.event_type),
-                }
+                println!("{}", inner);
             }
             _ => println!("unknown message type: {:?}", message),
         }
