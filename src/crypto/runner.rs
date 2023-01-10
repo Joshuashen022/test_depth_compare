@@ -21,9 +21,15 @@ pub const ACCESS_KEY: &str = "jZbRjKQYKPLXE28tBYCBQw";
 pub const SECRET_KEY: &str = "cs2ZGo3aWaf7dJYD9CLTX7";
 
 pub async fn send_request() {
+    let instrument_name = "USD_USDT";
+    let is_buy = true;
+    let amount = "10";
+    let price = "1";
+    let client_oid = "3a941ae3-d1b8-4889-8aff-777a78529ce5";
+    let is_maker = false;
 
-    let param = GetAccountSummary{currency: String::from("USD")};
-    let method = "private/get-account-summary";
+    let param = CreateOrder::new(instrument_name, is_buy, price, amount, client_oid, is_maker);
+    let method = "private/create-order";
     let id = 11;
     let mut req = CryptoRequest::new(method, id, param);
     req.sign(ACCESS_KEY, SECRET_KEY);

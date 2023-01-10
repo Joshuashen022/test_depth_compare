@@ -12,10 +12,63 @@ pub trait CryptoDecode{
 pub struct GetAccountSummary{
     pub currency: String,
 }
+
 impl CryptoDecode for GetAccountSummary{
     fn into_string(self) -> String {
         let mut params = Vec::new();
-        params.push(("currency".to_string(), self.currency));
+        params.push(("currency".into(), self.currency));
+        CryptoParams(params).into_string()
+    }
+}
+
+#[derive(Clone, Debug, Serialize)]
+pub struct CreateOrder{
+    pub instrument_name: String,
+    pub side: String,
+    pub r#type:String,
+    pub price: String,
+    pub quantity: String,
+    pub notional: Option<String>,
+    pub client_oid: String,
+    pub time_in_force: Option<String>,
+    pub exec_inst: String,
+    pub trigger_price: Option<String>
+}
+
+impl CreateOrder{
+    pub fn new(
+        instrument_name: &str,
+        is_buy: bool,
+        price: &str,
+        amount: &str,
+        client_oid: &str,
+        is_maker: bool,
+    ) -> Self{
+        CreateOrder{
+            instrument_name: instrument_name.to_string(),
+            side: if is_buy {"BUY".into()} else{"SELL".into()},
+            r#type:"LIMIT".into(),
+            price: price.into(),
+            quantity: amount.into(),
+            notional: None,
+            client_oid: client_oid.into(),
+            time_in_force: None,
+            exec_inst: if is_maker{"POST_ONLY".into()}else{"".into()},
+            trigger_price: None
+        }
+    }
+}
+
+impl CryptoDecode for CreateOrder{
+    fn into_string(self) -> String {
+        let mut params = Vec::new();
+        params.push(("instrument_name".into(), self.instrument_name));
+        params.push(("side".into(), self.side));
+        params.push(("type".into(), self.r#type));
+        params.push(("price".into(), self.price));
+        params.push(("quantity".into(), self.quantity));
+        params.push(("client_oid".into(), self.client_oid));
+        params.push(("exec_inst".into(), self.exec_inst));
         CryptoParams(params).into_string()
     }
 }
