@@ -1,17 +1,9 @@
-use super::runner::*;
 use anyhow::{Error, Result, anyhow};
-// use ordered_float::OrderedFloat;
-// use serde::de::{SeqAccess, Visitor};
+
 use serde::{Deserialize, Serialize};
-// use serde::Deserializer;
-// use std::collections::BTreeMap;
-// use std::fmt::{self, Debug};
 use std::time::{SystemTime, UNIX_EPOCH};
-// use tokio_tungstenite::tungstenite;
-// use tungstenite::protocol::Message;
 use hex::encode;
 use hmac::{Hmac, Mac};
-// use reqwest;
 use sha2::Sha256;
 type HmacSha256 = Hmac<Sha256>;
 #[derive(Clone, Deserialize, Serialize, Debug)]
@@ -19,7 +11,6 @@ pub struct ListenKey {
     #[serde(rename = "listenKey")]
     listen_key: String,
 }
-
 #[derive(Clone, Deserialize, Serialize, Debug)]
 pub struct PayloadType {
     #[serde(rename = "e")]
@@ -173,7 +164,7 @@ impl BinanceOrderUpdatePayload {
         Ok((trade_info, order_info))
     }
 
-    pub fn into_trade_and_order_info_debug(self) -> Result<(Option<TradeInfo>, Option<OrderInfo>)> {
+    pub fn into_trade_and_order_info_mock(self) -> Result<(Option<TradeInfo>, Option<OrderInfo>)> {
         let mut trade_info = None;
         let mut order_info = None;
         
@@ -257,11 +248,26 @@ impl BinanceOrderUpdatePayload {
         }
     }
 }
+#[derive(Clone, PartialEq)]
+pub struct OrderStreamReply {
+    pub status: i32, // status
+    pub order_price: f64, // order_price
+    pub quantity: f64, // order_quantity
+    pub order_id: String, // order_id
+    pub client_order_id: String, // client_order_id
+    pub create_time: u64, // order_creation_time
+    pub update_time: u64, // event_time
+    pub cumu_trade_qty: f64, // cumulative_filled_quantity
+    pub cumu_trade_value: f64, // cumulative_transacted_quantity
+    pub avg_price: f64, // average_price
+    pub fee_currency: String, // comession_asset
+    pub reason: String,
+}
 
 #[derive(Clone, Deserialize, Serialize, Debug)]
 pub struct OrderInfo {
     // orderInfo.OrderPrice
-    order_price: String,
+    order_price: String, 
     // orderInfo.Quantity
     order_quantity: String,
     // orderInfo.OrderId
@@ -284,6 +290,20 @@ pub struct OrderInfo {
     //     orderInfo.AvgPrice = orderInfo.CumuTradeValue / orderInfo.CumuTradeQty
     // }
     average_price: f64,
+}
+
+#[derive(Clone, PartialEq)]
+pub struct TradeStreamReply {
+    pub fee: f64, // commission_amount
+    pub trade_time: u64, // transaction_time
+    pub trade_price: f64, // last_executed_price
+    pub trade_qty: f64, // last_executed_quantity
+    pub cumu_trade_qty: f64,
+    pub cumu_trade_value: f64,
+    pub fee_currency: String, // comession_asset
+    pub order_id: String, // order_id
+    pub client_order_id: String, // client_order_id
+    pub trade_id: String, // trade_id
 }
 
 #[derive(Clone, Deserialize, Serialize, Debug)]
@@ -349,6 +369,7 @@ mod test {
     use hmac::{Hmac, Mac};
     use sha2::Sha256;
 
+
     #[test]
     fn sha256_test() {
         type HmacSha256 = Hmac<Sha256>;
@@ -364,5 +385,22 @@ mod test {
             result,
             String::from("c8db56825ae71d6d79447849e617115f4a920fa2acdcab2b053c4b2838bd6b71")
         );
+    }
+
+
+    #[test]
+    fn hash_map_test(){
+        let mut a: Vec<(String,String)> = Vec::new();
+        let _ = a.push(("zac".to_string(), "123".to_string()));
+        let _ = a.push(("abc".to_string(), "123".to_string()));
+        let _ = a.push(("ccc".to_string(), "123".to_string()));
+        let _ = a.push(("cac".to_string(), "123".to_string()));
+        let _ = a.push(("qbc".to_string(), "123".to_string()));
+
+        a.sort();
+
+        for (k, v) in a.iter(){
+            println!("k: {}, v: {}", k, v);
+        }
     }
 }

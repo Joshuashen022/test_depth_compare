@@ -10,8 +10,8 @@ const TRADE_URL_SPOT: &str = "https://api.binance.com";
 // const API_OPEN_ORDERS : &str = "/api/v3/openOrders";
 // const API_ALL_ORDERS : &str = "/api/v3/allOrders";
 const API_USER_DATA_STREAM : &str = "/api/v3/userDataStream";
-pub const ACCESS_KEY: &str = "nifNGIXIzco8YXe3PpuD0zMXvJN33WpWdNNxHl1GLb1JIS5n9TttdcIxlZnHQhGA";
-pub const SECRET_KEY: &str = "atl3kPizvOkgM366O2OPbotuQpbWIxH2M4IEbvAwwqxey6amjKODfb0mBsVNpji1";
+pub const ACCESS_KEY: &str = "jZbRjKQYKPLXE28tBYCBQw";
+pub const SECRET_KEY: &str = "cs2ZGo3aWaf7dJYD9CLTX7";
 
 
 pub async fn send_get_key_request() -> String{
