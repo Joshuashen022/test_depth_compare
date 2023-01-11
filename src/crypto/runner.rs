@@ -102,10 +102,10 @@ pub async fn send_http_request() {
     let url = Url::parse(&address).expect("Bad URL");
     println!("url {:?}", address);
 
-    // .header("X-MBX-APIKEY", ACCESS_KEY)
     let response = reqwest::Client::new()
         .post(url)
         .body(body)
+        .header("Content-Type", "application/json")
         .send()
         .await
         .unwrap();
