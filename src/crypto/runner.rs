@@ -80,7 +80,7 @@ pub async fn send_http_request() {
 
     let id = 100; 
     let params = {
-        let instrument_name = "USDC_USDT";
+        let instrument_name = "USD_USDT";
         let is_buy = true;
         let amount = "10";
         let price = "1";
