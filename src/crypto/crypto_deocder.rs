@@ -92,11 +92,11 @@ pub struct CreateOrder{
     pub r#type:String,
     pub price: String,
     pub quantity: String,
-    pub notional: Option<String>,
+    // pub notional: Option<String>,
     pub client_oid: String,
-    pub time_in_force: Option<String>,
+    // pub time_in_force: Option<String>,
     pub exec_inst: String,
-    pub trigger_price: Option<String>
+    // pub trigger_price: Option<String>
 }
 
 impl CreateOrder{
@@ -114,11 +114,11 @@ impl CreateOrder{
             r#type:"LIMIT".into(),
             price: price.into(),
             quantity: amount.into(),
-            notional: None,
+            // notional: None,
             client_oid: client_oid.into(),
-            time_in_force: None,
+            // time_in_force: None,
             exec_inst: if is_maker{"POST_ONLY".into()}else{"".into()},
-            trigger_price: None
+            // trigger_price: None
         }
     }
 }
