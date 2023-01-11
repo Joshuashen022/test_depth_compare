@@ -8,9 +8,73 @@ type HmacSha256 = Hmac<Sha256>;
 pub trait CryptoDecode{
     fn into_string(self) -> String;
 }
+
+#[derive(Clone, Debug, Serialize)]
+pub struct EmptyParams{}
+
+impl CryptoDecode for EmptyParams{
+    fn into_string(self) -> String{
+        String::new()
+    }
+}
+
 #[derive(Clone, Debug, Serialize)]
 pub struct GetAccountSummary{
     pub currency: String,
+}
+
+#[derive(Clone, Serialize, Debug)]
+pub struct GetInstrument{
+    id: i64,
+    method: String,
+    nonce: i64,
+}
+
+impl GetInstrument{
+    pub fn new() -> Self{
+        let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
+        GetInstrument{
+            id:0,
+            method: "public/get-instruments".to_string(),
+            nonce: now.as_millis() as i64,
+        }
+    }
+}
+
+#[derive(Clone, Serialize, Debug)]
+pub struct AuthRequest{
+    id: i64,
+    method: String,
+    api_key: String,
+    // sig: String,
+    nonce: i64,
+}
+
+impl AuthRequest {
+    pub fn new(api_key: &str, secret_key:&str) -> Self{
+        
+        let id = 0;
+        let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
+        let nonce = now.as_millis() as i64;
+        let method = "public/auth".to_string();
+        let sig_payload = format!("{}{}{}{}", method, id, api_key, nonce);
+        let hash = Hasher{
+            secret_key: secret_key.to_string(),
+            api_key: api_key.to_string(),
+            raw_message: sig_payload,
+        };
+        
+        let _ = hash.hash();
+        // let sig = "ad".to_string();
+        AuthRequest{
+            id,
+            method,
+            api_key: api_key.to_string(),
+            // sig,
+            nonce,
+        }
+
+    }
 }
 
 impl CryptoDecode for GetAccountSummary{
@@ -93,8 +157,8 @@ pub struct CryptoRequest<Params:Clone>{
     method: String,
     /// (key, value)
     params: Params,
-    // api_key: String,
-    // sig: String,
+    api_key: String,
+    sig: String,
     nonce: i64,
 }
 
@@ -103,18 +167,18 @@ impl<Params:CryptoDecode + Clone> CryptoRequest<Params>{
         let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
         CryptoRequest { 
             method: method.to_string(),
-            // api_key: String::new(),
+            api_key: String::new(),
             id, 
             params, 
             nonce: now.as_millis() as i64,
-            // sig: String::new(),
+            sig: String::new(),
         }
     }
 
     pub fn sign(&mut self, api_key: &str, secret_key: &str){
-        let _sig = self.sign_request(api_key, secret_key);
-        // self.api_key = api_key.to_string();
-        // self.sig = sig;
+        let sig = self.sign_request(api_key, secret_key);
+        self.api_key = api_key.to_string();
+        self.sig = sig;
     }
 
     fn sign_request(&self, api_key: &str, secret_key: &str) -> String {
